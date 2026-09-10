@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Abstracciones/Abstracciones.csproj" />
+  <Project Path="API/API.csproj" />
+  <Project Path="Repository/Repository.csproj" />
+  <Project Path="Services/Services.csproj" />
+</Solution>
