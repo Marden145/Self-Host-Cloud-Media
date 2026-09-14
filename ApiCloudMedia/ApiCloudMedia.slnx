@@ -1,6 +1,6 @@
 <Solution>
-  <Project Path="Abstracciones/Abstracciones.csproj" />
+  <Project Path="Abstracciones/Abstracciones.csproj" Id="f4b46f1c-9226-466c-9e3a-b884846cc045" />
   <Project Path="API/API.csproj" />
-  <Project Path="Repository/Repository.csproj" />
-  <Project Path="Services/Services.csproj" />
+  <Project Path="Repository/Repository.csproj" Id="dab2187c-7f4b-4466-beca-1a1e6c462069" />
+  <Project Path="Services/Services.csproj" Id="1a8c0731-17f7-4beb-8d78-963f8b8b8ba8" />
 </Solution>

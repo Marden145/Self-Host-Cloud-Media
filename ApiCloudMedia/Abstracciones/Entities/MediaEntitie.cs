@@ -1,12 +1,14 @@
-﻿using System;
-using Abstracciones.Enums;
-using Microsoft.AspNetCore.Http;
+﻿using Abstracciones.Enums;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
-namespace Abstracciones.Models
+namespace Abstracciones.Entities
 {
-    
-    public class MediaBase
+    public class MediaEntitie
     {
+        public Guid Id { get; set; }
+        public string StoragePath { get; set; }
         public string OriginalFileName { get; set; }
         public string ContentType { get; set; }
         public long FileSize { get; set; }
@@ -18,15 +20,4 @@ namespace Abstracciones.Models
         public DateTimeOffset? CapturedAt { get; set; }
         public int state { get; set; }
     }
-
-    public class MediaResponse : MediaBase
-    {
-        public Guid Id { get; set; }
-        public string StoragePath { get; set; }
-    }
-    public class MediaRequest
-    {
-        public IFormFile File { get; set; }
-    }
-
 }

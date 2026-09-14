@@ -15,13 +15,13 @@ namespace Services
             var file = mediaRequest.File;
             string fileName = GetFileName(Path.GetExtension(file.FileName));
 
-            using var stream = file.OpenReadStream();
+            await using var stream = file.OpenReadStream();
             var storagePath = await SaveAsync(
             stream,
             fileName,
             cancellationToken);
 
-            throw new NotImplementedException();
+            return Guid.NewGuid();
         }
         private string GetFileName(string extension)
         {
@@ -29,7 +29,8 @@ namespace Services
         }
         private async Task<string> SaveAsync(Stream stream, string fileName, CancellationToken cancellationToken)
         {
-            string fullPath = Path.Combine("ruta", fileName);
+            Directory.CreateDirectory("C:\\Users\\Marden\\Desktop\\ImagenesProyecto");
+            string fullPath = Path.Combine("C:\\Users\\Marden\\Desktop\\ImagenesProyecto", fileName);//pasar el appsettings
             await using var fileStream = new FileStream(
             fullPath,
             FileMode.CreateNew,
@@ -42,9 +43,9 @@ namespace Services
             fileStream,
             cancellationToken);
 
-            return storagePath;
+            return fullPath;
         }
     }
-    
+
 
 }
