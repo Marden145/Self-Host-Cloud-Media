@@ -10,6 +10,7 @@ namespace Abstracciones.Interfaces.API
     public interface IMediaController
     {
         Task<IActionResult> SaveMediaAsync(MediaRequest mediaRequest, CancellationToken cancellationToken);
+        Task<IActionResult> GetMedia();
 
     }
 }

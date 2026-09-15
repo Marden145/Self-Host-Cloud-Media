@@ -1,4 +1,7 @@
-﻿using Abstracciones.Interfaces.Services;
+﻿using Abstracciones.Entities;
+using Abstracciones.Enums;
+using Abstracciones.Interfaces.Repository;
+using Abstracciones.Interfaces.Services;
 using Abstracciones.Models;
 using System;
 using System.IO;
@@ -9,7 +12,11 @@ namespace Services
 {
     public class MediaServices : IMediaServices
     {
-        public MediaServices() { }
+        private readonly IMediaRepository _mediaRepository;
+        public MediaServices(IMediaRepository mediaRepository)
+        {
+            _mediaRepository = mediaRepository;
+        }
         public async Task<Guid> SaveMediaAsync(MediaRequest mediaRequest, CancellationToken cancellationToken)
         {
             var file = mediaRequest.File;
@@ -20,9 +27,11 @@ namespace Services
             stream,
             fileName,
             cancellationToken);
-
-            return Guid.NewGuid();
+            MediaEntitie mediaEntity = CreateMediaEntitie(mediaRequest, storagePath);
+            await _mediaRepository.AddMedia(mediaEntity);
+            return mediaEntity.Id;
         }
+        public async Task<IEnumerable<MediaEntitie>> GetMedia() => await _mediaRepository.GetMedia();
         private string GetFileName(string extension)
         {
             return $"{Guid.NewGuid()}{extension}";
@@ -45,6 +54,34 @@ namespace Services
 
             return fullPath;
         }
+        private MediaEntitie CreateMediaEntitie(MediaRequest mediaRequest,string storagePath) 
+        {
+            var media = new MediaEntitie
+            {
+                Id = Guid.NewGuid(),
+                StoragePath = storagePath,
+                OriginalFileName = mediaRequest.File.FileName,
+                ContentType = mediaRequest.File.ContentType,
+                FileSize = mediaRequest.File.Length,
+                Type = DetermineMediaType(mediaRequest.File.ContentType),
+                UploadedAt = DateTimeOffset.UtcNow,
+                state = 1
+            };
+            return media;
+        }
+        private static MediaType DetermineMediaType(string contentType) =>
+        contentType?.ToLowerInvariant() switch
+        {
+        var type when contentType.StartsWith("image/") => MediaType.Image,
+        var type when contentType.StartsWith("video/") => MediaType.Video,
+        var type when contentType.StartsWith("audio/") => MediaType.Audio,
+        var type when contentType.StartsWith("application/") ||
+                     contentType.StartsWith("text/") => MediaType.Document,
+        _ => MediaType.Other
+        };
+
+
+
     }
 
 

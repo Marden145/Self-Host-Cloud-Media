@@ -25,5 +25,9 @@ namespace API.Controllers
             var result = await _mediaServices.SaveMediaAsync(mediaRequest, cancellationToken);
             return Ok(result);
         }
+        [HttpGet]
+        public async Task<IActionResult> GetMedia() => Ok(await _mediaServices.GetMedia());
+
+
     }
 }

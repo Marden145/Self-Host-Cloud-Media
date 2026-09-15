@@ -1,4 +1,5 @@
-﻿using Abstracciones.Models;
+﻿using Abstracciones.Entities;
+using Abstracciones.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,5 +12,6 @@ namespace Abstracciones.Interfaces.Services
     public interface IMediaServices
     {
         Task<Guid> SaveMediaAsync(MediaRequest mediaRequest, CancellationToken cancellationToken);
+        Task<IEnumerable<MediaEntitie>> GetMedia();
     }
 }
