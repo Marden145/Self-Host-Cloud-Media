@@ -15,6 +15,8 @@ builder.WebHost.ConfigureKestrel(options =>
 builder.Services.AddControllers();
 builder.Services.AddScoped<IMediaServices, MediaServices>();
 builder.Services.AddScoped<IMediaRepository, MediaRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserServices, UserServices>();
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<CloudMediaDbContext>(options =>
     options.UseSqlServer(

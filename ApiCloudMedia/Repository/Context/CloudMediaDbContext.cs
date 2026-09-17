@@ -12,5 +12,7 @@ namespace Repository.Context
         {
         }
         public DbSet<MediaEntitie> Media => Set<MediaEntitie>();
+        public DbSet<UserEntity> User => Set<UserEntity>();
+
     }
 }
