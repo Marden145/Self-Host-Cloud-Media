@@ -9,5 +9,6 @@ namespace Abstracciones.Interfaces.Repository
     {
         Task AddMedia(MediaEntitie mediaEntity);
         Task<IEnumerable<MediaEntitie>> GetMedia();
+        Task<int> CountByIdsAsync(List<Guid> mediaIds);
     }
 }

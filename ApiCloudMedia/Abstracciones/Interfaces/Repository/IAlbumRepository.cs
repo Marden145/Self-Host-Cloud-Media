@@ -1,0 +1,18 @@
+﻿using Abstracciones.Entities;
+using Abstracciones.Models;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Abstracciones.Interfaces.Repository
+{
+    public interface IAlbumRepository
+    {
+        Task AddAlbum(AlbumEntity albumEntity);
+        Task AddAlbumMedia(IEnumerable<AlbumMediaEntity> albumMediaEntity);
+        Task<bool> AlbumExists(Guid albumId);
+        Task<List<Guid>> GetExistingMediaIdsAsync(Guid albumId, List<Guid> mediaIds);
+
+
+    }
+}

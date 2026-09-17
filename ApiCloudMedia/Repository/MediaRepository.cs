@@ -11,16 +11,19 @@ namespace Repository
     public class MediaRepository: IMediaRepository
     {
         private readonly CloudMediaDbContext _context;
-        public MediaRepository(CloudMediaDbContext context)
-        {
-            _context = context;
-        }
+        public MediaRepository(CloudMediaDbContext context) => _context = context;
 
         public async Task AddMedia(MediaEntitie mediaEntity)
         {
             _context.Media.Add(mediaEntity);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<int> CountByIdsAsync(List<Guid> mediaIds)
+        {
+            return await _context.Media.CountAsync(m => mediaIds.Contains(m.Id) && m.state == 1);
+        }
+
         public async Task<IEnumerable<MediaEntitie>> GetMedia()
         {
             return await _context.Media
