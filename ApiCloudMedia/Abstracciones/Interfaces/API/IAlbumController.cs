@@ -12,7 +12,7 @@ namespace Abstracciones.Interfaces.API
         Task<IActionResult> AddAlbum(AlbumRequest albumRequest);
         Task<IActionResult> AddAlbumMedia(AlbumMediaRequest albumMediaRequest);
         Task<IActionResult> DeleteAlbum(Guid idAlbum);
-        Task<IActionResult> DeleteAlbumMedia(Guid idAlbumMedia);
+        Task<IActionResult> DeleteAlbumMedia(Guid idAlbum, Guid idMedia);
         Task<IActionResult> GetAlbums();
         Task<IActionResult> GetAlbumMedia(Guid idAlbum);
 

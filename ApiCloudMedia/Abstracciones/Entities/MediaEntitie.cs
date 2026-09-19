@@ -20,6 +20,7 @@ namespace Abstracciones.Entities
         public TimeSpan? Duration { get; set; }
         public DateTimeOffset UploadedAt { get; set; }
         public DateTimeOffset? CapturedAt { get; set; }
+        public bool IsFavorite { get; set; } = false;
         public int state { get; set; }
     }
 }

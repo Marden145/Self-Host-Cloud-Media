@@ -54,10 +54,10 @@ namespace Services
             return idAlbum;
         }
 
-        public async Task<Guid> DeleteAlbumMedia(Guid idAlbumMedia)
+        public async Task<Guid> DeleteAlbumMedia(Guid idAlbum, Guid idMedia)
         {
-            await _albumRepository.DeleteAlbumMedia(idAlbumMedia);
-            return idAlbumMedia;
+            await _albumRepository.DeleteAlbumMedia(idAlbum, idMedia);
+            return idAlbum;
         }
 
         public async Task<AlbumMediaResponse?> GetAlbumMedia(Guid idAlbum) => await _albumRepository.GetAlbumMedia(idAlbum);

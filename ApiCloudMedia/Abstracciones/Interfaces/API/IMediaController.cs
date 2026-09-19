@@ -1,4 +1,5 @@
-﻿using Abstracciones.Models;
+﻿using Abstracciones.Entities;
+using Abstracciones.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -12,6 +13,8 @@ namespace Abstracciones.Interfaces.API
         Task<IActionResult> SaveMediaAsync(MediaRequest mediaRequest, CancellationToken cancellationToken);
         Task<IActionResult> GetMedia();
         Task<IActionResult> DeleteMedia(Guid idMedia);
+        Task<IActionResult> SetFavorite(Guid idMedia, bool isFavorite);
+        Task<IActionResult> GetFavorites();
 
     }
 }

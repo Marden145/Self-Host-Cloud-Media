@@ -85,6 +85,10 @@ namespace Services
             await _mediaRepository.DeleteMedia(idMedia);
             return idMedia;
         }
+
+        public async Task<bool> SetFavorite(Guid idMedia, bool isFavorite) => await _mediaRepository.SetFavorite(idMedia, isFavorite);
+
+        public async Task<IEnumerable<MediaEntitie>> GetFavorites() => await _mediaRepository.GetFavorites();
     }
 
 

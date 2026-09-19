@@ -19,10 +19,7 @@ namespace Repository
             await _context.SaveChangesAsync();
         }
 
-        public async Task<int> CountByIdsAsync(List<Guid> mediaIds)
-        {
-            return await _context.Media.CountAsync(m => mediaIds.Contains(m.Id) && m.state == 1);
-        }
+        public async Task<int> CountByIdsAsync(List<Guid> mediaIds) => await _context.Media.CountAsync(m => mediaIds.Contains(m.Id) && m.state == 1);
 
         public async Task DeleteMedia(Guid idMedia)
         {
@@ -34,12 +31,21 @@ namespace Repository
                 throw new InvalidOperationException("The specified media does not exist.");
         }
 
-        public async Task<IEnumerable<MediaEntitie>> GetMedia()
-        {
-            return await _context.Media
+        public async Task<IEnumerable<MediaEntitie>> GetFavorites() => await _context.Media
+        .Where(m => m.state == 1 && m.IsFavorite)
+        .ToListAsync();
+
+        public async Task<IEnumerable<MediaEntitie>> GetMedia() => await _context.Media
                 .Where(m => m.state == 1)
                 .ToListAsync();
-        }
 
+        public async Task<bool> SetFavorite(Guid idMedia, bool isFavorite)
+        {
+            var rowsAffected = await _context.Media
+        .Where(m => m.Id == idMedia && m.state == 1)
+        .ExecuteUpdateAsync(setters => setters
+            .SetProperty(m => m.IsFavorite, isFavorite));
+            return rowsAffected > 0;
+        }
     }
 }

@@ -11,7 +11,7 @@ namespace Abstracciones.Interfaces.Services
         Task<Guid> AddAlbum(AlbumRequest albumRequest);
         Task<Guid> AddAlbumMedia(AlbumMediaRequest albumMediaRequest);
         Task<Guid> DeleteAlbum(Guid idAlbum);
-        Task<Guid> DeleteAlbumMedia(Guid idAlbumMedia);
+        Task<Guid> DeleteAlbumMedia(Guid idAlbum, Guid idMedia);
         Task<IEnumerable<AlbumEntity>> GetAlbums();
         Task<AlbumMediaResponse?> GetAlbumMedia(Guid idAlbum);
 

@@ -39,12 +39,12 @@ namespace API.Controllers
             return Ok(await _albumServices.DeleteAlbum(idAlbum));
         }
 
-        [HttpDelete("DeleteAlbumMedia/{idAlbumMedia}")]
-        public async Task<IActionResult> DeleteAlbumMedia(Guid idAlbumMedia)
+        [HttpDelete("DeleteAlbumMedia/{idAlbum}/{idMedia}")]
+        public async Task<IActionResult> DeleteAlbumMedia(Guid idAlbum, Guid idMedia)
         {
-            if (idAlbumMedia == Guid.Empty)
-                return BadRequest("Invalid album media id");
-            return Ok(await _albumServices.DeleteAlbumMedia(idAlbumMedia));
+            if (idAlbum == Guid.Empty || idMedia == Guid.Empty)
+                return BadRequest("Invalid album or media id");
+            return Ok(await _albumServices.DeleteAlbumMedia(idAlbum, idMedia));
         }
         [HttpGet("GetAlbumMedia/{idAlbum}")]
         public async Task<IActionResult> GetAlbumMedia(Guid idAlbum)

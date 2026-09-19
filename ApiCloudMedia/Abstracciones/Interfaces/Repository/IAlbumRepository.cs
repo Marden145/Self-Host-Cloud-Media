@@ -14,7 +14,7 @@ namespace Abstracciones.Interfaces.Repository
         Task<bool> AlbumExists(Guid albumId);
         Task<List<Guid>> GetExistingMediaIdsAsync(Guid albumId, List<Guid> mediaIds);
         Task DeleteAlbum(Guid idAlbum);
-        Task DeleteAlbumMedia(Guid idAlbumMedia);
+        Task DeleteAlbumMedia(Guid idAlbum,Guid idMedia);
         Task<IEnumerable<AlbumEntity>> GetAlbums();
         Task<AlbumMediaResponse?> GetAlbumMedia(Guid idAlbum);
 

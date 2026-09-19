@@ -48,10 +48,10 @@ namespace Repository
                 throw new InvalidOperationException("The specified album does not exist.");
         }
 
-        public async Task DeleteAlbumMedia(Guid idAlbumMedia)
+        public async Task DeleteAlbumMedia(Guid idAlbum, Guid idMedia)
         {
             var rowsAffected = await _context.AlbumMedia
-        .Where(am => am.idAlbumMedia == idAlbumMedia)
+        .Where(am => am.idAlbum == idAlbum && am.IdMedia == idMedia && am.State == 1)
         .ExecuteUpdateAsync(setters => setters
             .SetProperty(am => am.State, 0));
 

@@ -12,5 +12,7 @@ namespace Abstracciones.Interfaces.Repository
         Task<IEnumerable<MediaEntitie>> GetMedia();
         Task<int> CountByIdsAsync(List<Guid> mediaIds);
         Task DeleteMedia(Guid idMedia);
+        Task<bool> SetFavorite(Guid idMedia, bool isFavorite);
+        Task<IEnumerable<MediaEntitie>> GetFavorites();
     }
 }

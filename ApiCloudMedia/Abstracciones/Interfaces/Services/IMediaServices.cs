@@ -15,5 +15,7 @@ namespace Abstracciones.Interfaces.Services
         Task<Guid> SaveMediaAsync(MediaRequest mediaRequest, CancellationToken cancellationToken);
         Task<IEnumerable<MediaEntitie>> GetMedia();
         Task<Guid> DeleteMedia(Guid idMedia);
+        Task<bool> SetFavorite(Guid idMedia, bool isFavorite);
+        Task<IEnumerable<MediaEntitie>> GetFavorites();
     }
 }
