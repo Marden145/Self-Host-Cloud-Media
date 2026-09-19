@@ -24,6 +24,16 @@ namespace Repository
             return await _context.Media.CountAsync(m => mediaIds.Contains(m.Id) && m.state == 1);
         }
 
+        public async Task DeleteMedia(Guid idMedia)
+        {
+            var rowsAffected = await _context.Media
+        .Where(m => m.Id == idMedia)
+        .ExecuteUpdateAsync(setters => setters
+            .SetProperty(m => m.state, 0));
+            if (rowsAffected == 0)
+                throw new InvalidOperationException("The specified media does not exist.");
+        }
+
         public async Task<IEnumerable<MediaEntitie>> GetMedia()
         {
             return await _context.Media

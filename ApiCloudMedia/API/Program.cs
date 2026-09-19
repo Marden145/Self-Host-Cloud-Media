@@ -17,6 +17,8 @@ builder.Services.AddScoped<IMediaServices, MediaServices>();
 builder.Services.AddScoped<IMediaRepository, MediaRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserServices, UserServices>();
+builder.Services.AddScoped<IAlbumRepository, AlbumRepository>();
+builder.Services.AddScoped<IAlbumServices, AlbumServices>();
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<CloudMediaDbContext>(options =>
     options.UseSqlServer(

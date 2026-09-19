@@ -80,8 +80,11 @@ namespace Services
         _ => MediaType.Other
         };
 
-
-
+        public async Task<Guid> DeleteMedia(Guid idMedia)
+        {
+            await _mediaRepository.DeleteMedia(idMedia);
+            return idMedia;
+        }
     }
 
 

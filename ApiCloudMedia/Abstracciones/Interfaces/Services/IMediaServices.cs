@@ -1,5 +1,6 @@
 ﻿using Abstracciones.Entities;
 using Abstracciones.Models;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,5 +14,6 @@ namespace Abstracciones.Interfaces.Services
     {
         Task<Guid> SaveMediaAsync(MediaRequest mediaRequest, CancellationToken cancellationToken);
         Task<IEnumerable<MediaEntitie>> GetMedia();
+        Task<Guid> DeleteMedia(Guid idMedia);
     }
 }

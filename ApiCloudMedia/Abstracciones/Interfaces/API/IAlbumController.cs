@@ -1,4 +1,5 @@
-﻿using Abstracciones.Models;
+﻿using Abstracciones.Entities;
+using Abstracciones.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -10,5 +11,10 @@ namespace Abstracciones.Interfaces.API
     {
         Task<IActionResult> AddAlbum(AlbumRequest albumRequest);
         Task<IActionResult> AddAlbumMedia(AlbumMediaRequest albumMediaRequest);
+        Task<IActionResult> DeleteAlbum(Guid idAlbum);
+        Task<IActionResult> DeleteAlbumMedia(Guid idAlbumMedia);
+        Task<IActionResult> GetAlbums();
+        Task<IActionResult> GetAlbumMedia(Guid idAlbum);
+
     }
 }

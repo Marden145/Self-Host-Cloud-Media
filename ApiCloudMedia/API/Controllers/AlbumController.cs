@@ -1,4 +1,5 @@
-﻿using Abstracciones.Interfaces.API;
+﻿using Abstracciones.Entities;
+using Abstracciones.Interfaces.API;
 using Abstracciones.Interfaces.Services;
 using Abstracciones.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +15,7 @@ namespace API.Controllers
         {
             _albumServices = albumServices;
         }
-
+        [HttpPost("AddAlbum")]
         public async Task<IActionResult> AddAlbum(AlbumRequest albumRequest)
         {
             if(albumRequest==null)
@@ -22,11 +23,47 @@ namespace API.Controllers
             return Ok(await _albumServices.AddAlbum(albumRequest));
         }
 
+        [HttpPost("AddAlbumMedia")]
         public async Task<IActionResult> AddAlbumMedia(AlbumMediaRequest albumMediaRequest)
         {
             if(albumMediaRequest==null)
                 return BadRequest("Invalid album media request");
             return Ok(await _albumServices.AddAlbumMedia(albumMediaRequest));
+        }
+        [HttpDelete("DeleteAlbum/{idAlbum}")]
+        public async Task<IActionResult> DeleteAlbum(Guid idAlbum)
+        {
+            if(idAlbum == Guid.Empty)
+                return BadRequest("Invalid album id");
+
+            return Ok(await _albumServices.DeleteAlbum(idAlbum));
+        }
+
+        [HttpDelete("DeleteAlbumMedia/{idAlbumMedia}")]
+        public async Task<IActionResult> DeleteAlbumMedia(Guid idAlbumMedia)
+        {
+            if (idAlbumMedia == Guid.Empty)
+                return BadRequest("Invalid album media id");
+            return Ok(await _albumServices.DeleteAlbumMedia(idAlbumMedia));
+        }
+        [HttpGet("GetAlbumMedia/{idAlbum}")]
+        public async Task<IActionResult> GetAlbumMedia(Guid idAlbum)
+        {
+            if (idAlbum == Guid.Empty)
+                return BadRequest("Invalid album id");
+            var albumMedia = await _albumServices.GetAlbumMedia(idAlbum);
+            if (albumMedia is null)
+                return NotFound("Album media not found");
+            return Ok(albumMedia);
+        }
+
+        [HttpGet("GetAlbums")]
+        public async Task<IActionResult> GetAlbums() 
+        {
+            IEnumerable<AlbumEntity> albumEntity = await _albumServices.GetAlbums();
+            if(!albumEntity.Any())
+                return NotFound("No albums found");
+            return Ok(albumEntity);
         }
     }
 }

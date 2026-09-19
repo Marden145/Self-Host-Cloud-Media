@@ -1,12 +1,14 @@
 ﻿using Abstracciones.Enums;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 namespace Abstracciones.Entities
 {
     public class MediaEntitie
     {
+        [Key]
         public Guid Id { get; set; }
         public string StoragePath { get; set; }
         public string OriginalFileName { get; set; }

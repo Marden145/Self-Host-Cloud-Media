@@ -1,4 +1,5 @@
-﻿using Abstracciones.Interfaces.API;
+﻿using Abstracciones.Entities;
+using Abstracciones.Interfaces.API;
 using Abstracciones.Interfaces.Services;
 using Abstracciones.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -26,8 +27,20 @@ namespace API.Controllers
             return Ok(result);
         }
         [HttpGet]
-        public async Task<IActionResult> GetMedia() => Ok(await _mediaServices.GetMedia());
+        public async Task<IActionResult> GetMedia() 
+        {
+            IEnumerable<MediaEntitie> mediaEntity = await _mediaServices.GetMedia();
+            if(!mediaEntity.Any())
+                return NotFound("No media found");
+            return Ok(mediaEntity);
+        }
 
-
+        [HttpDelete("{idMedia}")]
+        public async Task<IActionResult> DeleteMedia(Guid idMedia)
+        {
+            if (idMedia == Guid.Empty)
+                return BadRequest("Invalid media ID.");
+            return Ok(await _mediaServices.DeleteMedia(idMedia));
+        }
     }
 }

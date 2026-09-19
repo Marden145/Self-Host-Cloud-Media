@@ -47,6 +47,22 @@ namespace Services
             await _albumRepository.AddAlbumMedia(albumMedia);
             return albumMediaRequest.idAlbum;
         }
+
+        public async Task<Guid> DeleteAlbum(Guid idAlbum)
+        {
+            await _albumRepository.DeleteAlbum(idAlbum);
+            return idAlbum;
+        }
+
+        public async Task<Guid> DeleteAlbumMedia(Guid idAlbumMedia)
+        {
+            await _albumRepository.DeleteAlbumMedia(idAlbumMedia);
+            return idAlbumMedia;
+        }
+
+        public async Task<AlbumMediaResponse?> GetAlbumMedia(Guid idAlbum) => await _albumRepository.GetAlbumMedia(idAlbum);
+        public async Task<IEnumerable<AlbumEntity>> GetAlbums() => await _albumRepository.GetAlbums();
+
         private async Task<List<Guid>> ValidateDataAlbumMedia(AlbumMediaRequest albumMediaRequest) 
         {
             var mediaIds = albumMediaRequest.IdMedias.Distinct().ToList();

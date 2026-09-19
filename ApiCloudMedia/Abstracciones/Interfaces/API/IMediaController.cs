@@ -11,6 +11,7 @@ namespace Abstracciones.Interfaces.API
     {
         Task<IActionResult> SaveMediaAsync(MediaRequest mediaRequest, CancellationToken cancellationToken);
         Task<IActionResult> GetMedia();
+        Task<IActionResult> DeleteMedia(Guid idMedia);
 
     }
 }
