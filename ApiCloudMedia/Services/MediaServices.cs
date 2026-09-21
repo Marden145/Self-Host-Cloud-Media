@@ -3,6 +3,7 @@ using Abstracciones.Enums;
 using Abstracciones.Interfaces.Repository;
 using Abstracciones.Interfaces.Services;
 using Abstracciones.Models;
+using Abstracciones.Models.Request;
 using System;
 using System.IO;
 using System.IO.Pipelines;
@@ -31,7 +32,7 @@ namespace Services
             await _mediaRepository.AddMedia(mediaEntity);
             return mediaEntity.Id;
         }
-        public async Task<IEnumerable<MediaEntitie>> GetMedia() => await _mediaRepository.GetMedia();
+        public async Task<Pagination<MediaEntitie>> GetMedia(int pageIndex, int pageSize) => await _mediaRepository.GetMedia(pageIndex, pageSize);
         private string GetFileName(string extension)
         {
             return $"{Guid.NewGuid()}{extension}";
@@ -88,7 +89,13 @@ namespace Services
 
         public async Task<bool> SetFavorite(Guid idMedia, bool isFavorite) => await _mediaRepository.SetFavorite(idMedia, isFavorite);
 
-        public async Task<IEnumerable<MediaEntitie>> GetFavorites() => await _mediaRepository.GetFavorites();
+        public async Task<Pagination<MediaEntitie>> GetFavorites(int pageIndex, int pageSize) => await _mediaRepository.GetFavorites(pageIndex, pageSize);
+
+        public async Task<Pagination<MediaEntitie>> FilterMedia(MediaFilterRequest filter) => await _mediaRepository.FilterMedia(filter);
+
+        public async Task<Pagination<MediaEntitie>> GetTrash(int pageIndex, int pageSize) => await _mediaRepository.GetTrash(pageIndex, pageSize);
+
+        public async Task<bool> RecoverMedia(Guid idMedia) => await _mediaRepository.RecoverMedia(idMedia);
     }
 
 

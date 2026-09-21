@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Abstracciones.Models
+namespace Abstracciones.Models.Request
 {
     public class AlbumMediaRequest
     {

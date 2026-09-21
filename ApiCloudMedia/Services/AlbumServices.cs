@@ -2,6 +2,7 @@
 using Abstracciones.Interfaces.Repository;
 using Abstracciones.Interfaces.Services;
 using Abstracciones.Models;
+using Abstracciones.Models.Request;
 using Azure.Core;
 using Repository;
 using System;

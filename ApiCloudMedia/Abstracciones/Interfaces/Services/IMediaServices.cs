@@ -1,5 +1,6 @@
 ﻿using Abstracciones.Entities;
 using Abstracciones.Models;
+using Abstracciones.Models.Request;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -13,9 +14,12 @@ namespace Abstracciones.Interfaces.Services
     public interface IMediaServices
     {
         Task<Guid> SaveMediaAsync(MediaRequest mediaRequest, CancellationToken cancellationToken);
-        Task<IEnumerable<MediaEntitie>> GetMedia();
+        Task<Pagination<MediaEntitie>> GetMedia(int pageIndex, int pageSize);
         Task<Guid> DeleteMedia(Guid idMedia);
         Task<bool> SetFavorite(Guid idMedia, bool isFavorite);
-        Task<IEnumerable<MediaEntitie>> GetFavorites();
+        Task<Pagination<MediaEntitie>> GetFavorites(int pageIndex, int pageSize);
+        Task<Pagination<MediaEntitie>> FilterMedia(MediaFilterRequest filter);
+        Task<Pagination<MediaEntitie>> GetTrash(int pageIndex, int pageSize);
+        Task<bool> RecoverMedia(Guid idMedia);
     }
 }

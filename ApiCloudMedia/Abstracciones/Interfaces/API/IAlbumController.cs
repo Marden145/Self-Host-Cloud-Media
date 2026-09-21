@@ -1,5 +1,6 @@
 ﻿using Abstracciones.Entities;
 using Abstracciones.Models;
+using Abstracciones.Models.Request;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;

@@ -2,6 +2,7 @@
 using Abstracciones.Interfaces.API;
 using Abstracciones.Interfaces.Services;
 using Abstracciones.Models;
+using Abstracciones.Models.Request;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
