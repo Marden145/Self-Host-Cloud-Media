@@ -1,11 +1,12 @@
 ﻿using Abstracciones.Entities;
 using Abstracciones.Interfaces.Repository;
+using Abstracciones.Models;
+using Microsoft.EntityFrameworkCore;
 using Repository.Context;
+using Repository.Utils;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Microsoft.EntityFrameworkCore;
-using Abstracciones.Models;
 namespace Repository
 {
     public class AlbumRepository: IAlbumRepository
@@ -27,7 +28,7 @@ namespace Repository
         public async Task<List<Guid>> GetExistingMediaIdsAsync(Guid albumId, List<Guid> mediaIds)
         {
             return await _context.AlbumMedia
-        .Where(am => am.idAlbum == albumId && mediaIds.Contains(am.IdMedia))
+        .Where(am => am.idAlbum == albumId && mediaIds.Contains(am.IdMedia) && am.State == 1)
         .Select(am => am.IdMedia)
         .ToListAsync();
         }
@@ -48,10 +49,10 @@ namespace Repository
                 throw new InvalidOperationException("The specified album does not exist.");
         }
 
-        public async Task DeleteAlbumMedia(Guid idAlbum, Guid idMedia)
+        public async Task DeleteAlbumMedia(Guid idAlbum, List<Guid> idMedias)
         {
             var rowsAffected = await _context.AlbumMedia
-        .Where(am => am.idAlbum == idAlbum && am.IdMedia == idMedia && am.State == 1)
+        .Where(am => am.idAlbum == idAlbum && idMedias.Contains(am.IdMedia) && am.State == 1)
         .ExecuteUpdateAsync(setters => setters
             .SetProperty(am => am.State, 0));
 
@@ -63,19 +64,27 @@ namespace Repository
                 .Where(a => a.State == 1)
                 .ToListAsync();
 
-        public async Task<AlbumMediaResponse?> GetAlbumMedia(Guid idAlbum)
+        public async Task<AlbumMediaResponse?> GetAlbumMedia(Guid idAlbum, int pageIndex, int pageSize)
         {
-            return await _context.Album
-        .Where(a => a.idAlbum == idAlbum && a.State == 1)
-        .Select(a => new AlbumMediaResponse
-        {
-            IdAlbum = a.idAlbum,
-            Name = a.Name,
-            CreatedAt = a.CreatedAt,
-            CoverMediaId = a.CoverMediaId,
-            State = a.State,
-            Media = a.AlbumMedia
-                .Where(am => am.State == 1 && am.Media.state == 1)
+            var albumInfo = await GetAlbumInfoAsync(idAlbum);
+            if (albumInfo is null) return null;
+            albumInfo.Media = await GetAlbumMediaPagedAsync(idAlbum, pageIndex, pageSize);
+            return albumInfo;
+        }
+        private async Task<AlbumMediaResponse?> GetAlbumInfoAsync(Guid idAlbum) => await _context.Album
+                .Where(a => a.idAlbum == idAlbum && a.State == 1)
+                .Select(a => new AlbumMediaResponse
+                {
+                    IdAlbum = a.idAlbum,
+                    Name = a.Name,
+                    CreatedAt = a.CreatedAt,
+                    CoverMediaId = a.CoverMediaId,
+                    State = a.State
+                })
+                .FirstOrDefaultAsync();
+        private async Task<Pagination<MediaResponse>> GetAlbumMediaPagedAsync(Guid idAlbum, int pageIndex, int pageSize) => await _context.AlbumMedia
+                .Where(am => am.idAlbum == idAlbum && am.State == 1 && am.Media.state == 1)
+                .OrderByDescending(am => am.Media.UploadedAt)
                 .Select(am => new MediaResponse
                 {
                     Id = am.Media.Id,
@@ -90,11 +99,6 @@ namespace Repository
                     UploadedAt = am.Media.UploadedAt,
                     CapturedAt = am.Media.CapturedAt,
                     state = am.Media.state
-                })
-                .ToList()
-        })
-        .FirstOrDefaultAsync();
-
-        }
+                }).ToPaginacionAsync(pageIndex, pageSize);
     }
 }

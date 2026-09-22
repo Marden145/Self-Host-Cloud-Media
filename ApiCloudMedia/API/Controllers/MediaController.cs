@@ -37,12 +37,12 @@ namespace API.Controllers
             return Ok(mediaEntity);
         }
 
-        [HttpDelete("{idMedia}")]
-        public async Task<IActionResult> DeleteMedia([FromRoute] Guid idMedia)
+        [HttpDelete("DeleteMedia")]
+        public async Task<IActionResult> DeleteMedia([FromBody] List<Guid> idMedias)
         {
-            if (idMedia == Guid.Empty)
-                return BadRequest("Invalid media ID.");
-            return Ok(await _mediaServices.DeleteMedia(idMedia));
+            if (idMedias == null || idMedias.Count == 0)
+                return BadRequest("Invalid media IDs.");
+            return Ok(await _mediaServices.DeleteMedia(idMedias));
         }
         [HttpPatch("{idMedia}/favorite")]
 

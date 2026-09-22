@@ -11,7 +11,7 @@ namespace Abstracciones.Models
         public DateTime? CreatedAt { get; set; }
         public Guid? CoverMediaId { get; set; }
         public int State { get; set; }
-        public List<MediaResponse> Media { get; set; }
+        public Pagination<MediaResponse> Media { get; set; }
 
     }
 }

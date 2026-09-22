@@ -23,10 +23,10 @@ namespace Repository
 
         public async Task<int> CountByIdsAsync(List<Guid> mediaIds) => await _context.Media.CountAsync(m => mediaIds.Contains(m.Id) && m.state == 1);
 
-        public async Task DeleteMedia(Guid idMedia)
+        public async Task DeleteMedia(List<Guid> idMedias)
         {
             var rowsAffected = await _context.Media
-        .Where(m => m.Id == idMedia && m.state == 1)
+        .Where(m => idMedias.Contains(m.Id) && m.state == 1)
         .ExecuteUpdateAsync(setters => setters
             .SetProperty(m => m.state, 0)
             .SetProperty(m => m.DeletedAt, DateTimeOffset.UtcNow));
@@ -101,5 +101,6 @@ namespace Repository
             .SetProperty(m => m.IsFavorite, isFavorite));
             return rowsAffected > 0;
         }
+        
     }
 }

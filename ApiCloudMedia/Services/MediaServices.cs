@@ -3,7 +3,10 @@ using Abstracciones.Enums;
 using Abstracciones.Interfaces.Repository;
 using Abstracciones.Interfaces.Services;
 using Abstracciones.Models;
+using Abstracciones.Models.Options;
 using Abstracciones.Models.Request;
+using Abstracciones.Options;
+using Microsoft.Extensions.Options;
 using System;
 using System.IO;
 using System.IO.Pipelines;
@@ -14,9 +17,11 @@ namespace Services
     public class MediaServices : IMediaServices
     {
         private readonly IMediaRepository _mediaRepository;
-        public MediaServices(IMediaRepository mediaRepository)
+        private readonly MediaOptions _mediaOptions;
+        public MediaServices(IMediaRepository mediaRepository, IOptions<MediaOptions> options)
         {
             _mediaRepository = mediaRepository;
+            _mediaOptions = options.Value;
         }
         public async Task<Guid> SaveMediaAsync(MediaRequest mediaRequest, CancellationToken cancellationToken)
         {
@@ -39,8 +44,8 @@ namespace Services
         }
         private async Task<string> SaveAsync(Stream stream, string fileName, CancellationToken cancellationToken)
         {
-            Directory.CreateDirectory("C:\\Users\\Marden\\Desktop\\ImagenesProyecto");
-            string fullPath = Path.Combine("C:\\Users\\Marden\\Desktop\\ImagenesProyecto", fileName);//pasar el appsettings
+            Directory.CreateDirectory(_mediaOptions.StoragePath);
+            string fullPath = Path.Combine(_mediaOptions.StoragePath, fileName);
             await using var fileStream = new FileStream(
             fullPath,
             FileMode.CreateNew,
@@ -81,10 +86,10 @@ namespace Services
         _ => MediaType.Other
         };
 
-        public async Task<Guid> DeleteMedia(Guid idMedia)
+        public async Task<List<Guid>> DeleteMedia(List<Guid> idMedias)
         {
-            await _mediaRepository.DeleteMedia(idMedia);
-            return idMedia;
+            await _mediaRepository.DeleteMedia(idMedias);
+            return idMedias;
         }
 
         public async Task<bool> SetFavorite(Guid idMedia, bool isFavorite) => await _mediaRepository.SetFavorite(idMedia, isFavorite);
@@ -96,6 +101,8 @@ namespace Services
         public async Task<Pagination<MediaEntitie>> GetTrash(int pageIndex, int pageSize) => await _mediaRepository.GetTrash(pageIndex, pageSize);
 
         public async Task<bool> RecoverMedia(Guid idMedia) => await _mediaRepository.RecoverMedia(idMedia);
+
+        
     }
 
 

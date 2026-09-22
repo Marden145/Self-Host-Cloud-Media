@@ -15,11 +15,12 @@ namespace Abstracciones.Interfaces.Services
     {
         Task<Guid> SaveMediaAsync(MediaRequest mediaRequest, CancellationToken cancellationToken);
         Task<Pagination<MediaEntitie>> GetMedia(int pageIndex, int pageSize);
-        Task<Guid> DeleteMedia(Guid idMedia);
+        Task<List<Guid>> DeleteMedia(List<Guid> idMedias);
         Task<bool> SetFavorite(Guid idMedia, bool isFavorite);
         Task<Pagination<MediaEntitie>> GetFavorites(int pageIndex, int pageSize);
         Task<Pagination<MediaEntitie>> FilterMedia(MediaFilterRequest filter);
         Task<Pagination<MediaEntitie>> GetTrash(int pageIndex, int pageSize);
         Task<bool> RecoverMedia(Guid idMedia);
+       
     }
 }

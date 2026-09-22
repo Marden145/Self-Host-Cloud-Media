@@ -13,12 +13,13 @@ namespace Abstracciones.Interfaces.API
     {
         Task<IActionResult> SaveMediaAsync(MediaRequest mediaRequest, CancellationToken cancellationToken);
         Task<IActionResult> GetMedia(int pageIndex, int pageSize);
-        Task<IActionResult> DeleteMedia(Guid idMedia);
+        Task<IActionResult> DeleteMedia(List<Guid> idMedias);
         Task<IActionResult> SetFavorite(Guid idMedia, SetFavoriteRequest setFavoriteRequest);
         Task<IActionResult> GetFavorites(int pageIndex, int pageSize);
         Task<IActionResult> FilterMedia(MediaFilterRequest filter);
         Task<IActionResult> GetTrash(int pageIndex, int pageSize);
         Task<IActionResult> RecoverMedia(Guid idMedia);
+        
 
     }
 }
