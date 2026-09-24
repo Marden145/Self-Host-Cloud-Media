@@ -3,13 +3,15 @@ using Abstracciones.Interfaces.API;
 using Abstracciones.Interfaces.Services;
 using Abstracciones.Models;
 using Abstracciones.Models.Request;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AlbumController : Controller, IAlbumController
+    [Authorize]
+    public class AlbumController : BaseApiController, IAlbumController
     {
         private readonly IAlbumServices _albumServices;
         public AlbumController(IAlbumServices albumServices)
@@ -61,7 +63,7 @@ namespace API.Controllers
         [HttpGet("GetAlbums")]
         public async Task<IActionResult> GetAlbums() 
         {
-            IEnumerable<AlbumEntity> albumEntity = await _albumServices.GetAlbums();
+            IEnumerable<AlbumEntity> albumEntity = await _albumServices.GetAlbums(CurrentUserId);
             if(!albumEntity.Any())
                 return NotFound("No albums found");
             return Ok(albumEntity);

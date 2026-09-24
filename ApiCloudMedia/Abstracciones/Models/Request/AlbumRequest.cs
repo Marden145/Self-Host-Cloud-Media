@@ -8,6 +8,7 @@ namespace Abstracciones.Models
     {
         public string Name { get; set; }
         public Guid? CoverMediaId { get; set; }
+        public Guid idUser { get; set; }
 
     }
 }

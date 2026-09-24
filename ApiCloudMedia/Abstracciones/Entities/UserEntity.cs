@@ -8,7 +8,7 @@ namespace Abstracciones.Entities
     public class UserEntity
     {
         [Key]
-        public Guid Id { get; set; }
+        public Guid IdUser { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; } 
         public string Email { get; set; } 

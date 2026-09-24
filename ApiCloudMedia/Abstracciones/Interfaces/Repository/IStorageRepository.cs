@@ -6,6 +6,6 @@ namespace Abstracciones.Interfaces.Repository
 {
     public interface IStorageRepository
     {
-        Task<long> GetTotalFileSizeBytes();
+        Task<long> GetTotalFileSizeBytes(Guid idUser);
     }
 }

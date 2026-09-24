@@ -13,6 +13,8 @@ namespace Abstracciones.Entities
         public DateTime? CreatedAt { get; set; }
         public int State { get; set; }
         public Guid? CoverMediaId { get; set; }
+        public Guid IdUser { get; set; }              
+        public UserEntity User { get; set; }
         public ICollection<AlbumMediaEntity> AlbumMedia { get; set; } = new List<AlbumMediaEntity>();
 
     }

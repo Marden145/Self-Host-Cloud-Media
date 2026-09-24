@@ -60,8 +60,8 @@ namespace Repository
                 throw new InvalidOperationException("The specified album media does not exist.");
         }
 
-        public async Task<IEnumerable<AlbumEntity>> GetAlbums() => await _context.Album
-                .Where(a => a.State == 1)
+        public async Task<IEnumerable<AlbumEntity>> GetAlbums(Guid idUser) => await _context.Album
+                .Where(a => a.State == 1 && a.IdUser == idUser)
                 .ToListAsync();
 
         public async Task<AlbumMediaResponse?> GetAlbumMedia(Guid idAlbum, int pageIndex, int pageSize)

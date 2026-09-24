@@ -13,7 +13,7 @@ namespace Abstracciones.Interfaces.Services
         Task<Guid> AddAlbumMedia(AlbumMediaRequest albumMediaRequest);
         Task<Guid> DeleteAlbum(Guid idAlbum);
         Task<Guid> DeleteAlbumMedia(Guid idAlbum, List<Guid> idMedias);
-        Task<IEnumerable<AlbumEntity>> GetAlbums();
+        Task<IEnumerable<AlbumEntity>> GetAlbums(Guid idUser);
         Task<AlbumMediaResponse?> GetAlbumMedia(Guid idAlbum, int pageIndex, int pageSize);
 
     }

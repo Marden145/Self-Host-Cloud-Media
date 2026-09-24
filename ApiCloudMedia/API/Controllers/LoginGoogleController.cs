@@ -2,6 +2,7 @@
 using Abstracciones.Interfaces.Services;
 using Abstracciones.Models;
 using Google.Apis.Upload;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -16,23 +17,13 @@ namespace API.Controllers
             _userServices = userServices;
         }
         [HttpPost("sing-google")]
-        public async Task<IActionResult> LoginWithGoogle(
-            [FromBody] GoogleLoginRequest request)
+        [AllowAnonymous]
+        public async Task<IActionResult> LoginWithGoogle([FromBody] GoogleLoginRequest request)
         {
-            try
-            {
-                return Ok(await _userServices.LoginWithGoogle(request.IdToken));
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(new { message = ex.Message });
-            }
+            var token = await _userServices.LoginWithGoogle(request.IdToken);
+            if (!token.ValidacionExitosa)
+                return Unauthorized(new { message = "Token de Google inválido." });
+            return Ok(token);
         }
-
-
-
-
-
-
     }
 }

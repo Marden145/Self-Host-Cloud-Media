@@ -17,7 +17,7 @@ namespace Abstracciones.Interfaces.API
         Task<IActionResult> SetFavorite(Guid idMedia, SetFavoriteRequest setFavoriteRequest);
         Task<IActionResult> GetFavorites(int pageIndex, int pageSize);
         Task<IActionResult> FilterMedia(MediaFilterRequest filter);
-        Task<IActionResult> GetTrash(int pageIndex, int pageSize);
+        Task<IActionResult> GetTrash( int pageIndex, int pageSize);
         Task<IActionResult> RecoverMedia(Guid idMedia);
         
 

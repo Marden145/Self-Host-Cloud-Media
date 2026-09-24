@@ -21,9 +21,9 @@ namespace Services
             _storageRepository = storageRepository;
         }
 
-        public async Task<StorageResponse> GetTotalFileSizeBytes()
+        public async Task<StorageResponse> GetTotalFileSizeBytes(Guid idUser)
         {
-            var usedBytes = await _storageRepository.GetTotalFileSizeBytes();
+            var usedBytes = await _storageRepository.GetTotalFileSizeBytes(idUser);
             var usedGB = usedBytes / BytesPerGB;
             var totalGB = _options.TotalStorageGB;
             return GetStorageResponse(usedGB, totalGB);

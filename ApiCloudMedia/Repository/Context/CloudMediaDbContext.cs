@@ -27,6 +27,23 @@ namespace Repository.Context
                 .WithMany(a => a.AlbumMedia)
                 .HasForeignKey(am => am.idAlbum);
 
+            modelBuilder.Entity<AlbumEntity>()
+        .HasOne(a => a.User)
+        .WithMany()
+        .HasForeignKey(a => a.IdUser)
+        .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MediaEntitie>()
+                .HasOne(m => m.User)
+                .WithMany()
+                .HasForeignKey(m => m.IdUser)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<MediaEntitie>()
+    .HasIndex(m => m.IdUser);
+
+            modelBuilder.Entity<AlbumEntity>()
+                .HasIndex(a => a.IdUser);
+
             base.OnModelCreating(modelBuilder);
         }
 

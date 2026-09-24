@@ -34,51 +34,52 @@ namespace Repository
                 throw new InvalidOperationException("The specified media does not exist.");
         }
 
-        public async Task<Pagination<MediaEntitie>> FilterMedia(MediaFilterRequest filter)
+        public async Task<Pagination<MediaEntitie>> FilterMedia(Guid idUser,MediaFilterRequest filter)
         {
-            IQueryable<MediaEntitie> query = _context.Media.Where(m => m.state == 1);
-            query = TypesFilters(filter, query);
+            IQueryable<MediaEntitie> query = _context.Media.Where(m => m.state == 1 && m.IdUser == idUser);
+            query = TypesFilters(idUser,filter, query);
             query = query.OrderByDescending(m => m.UploadedAt);
             return await query.ToPaginacionAsync(filter.PageIndex, filter.PageSize);
         }
 
-        private IQueryable<MediaEntitie> TypesFilters(MediaFilterRequest filter, IQueryable<MediaEntitie> query)
+        private IQueryable<MediaEntitie> TypesFilters(Guid idUser,MediaFilterRequest filter, IQueryable<MediaEntitie> query)
         {
             if (filter.AlbumId.HasValue)
             {
                 query = query.Where(m => _context.AlbumMedia
                     .Any(am => am.idAlbum == filter.AlbumId.Value
                             && am.IdMedia == m.Id
-                            && am.State == 1));
+                            && am.State == 1
+                            && m.IdUser == idUser));
             }
             if (filter.DateFrom.HasValue)
-                query = query.Where(m => m.UploadedAt >= filter.DateFrom.Value);
+                query = query.Where(m => m.UploadedAt >= filter.DateFrom.Value && m.IdUser == idUser);
 
             if (filter.DateTo.HasValue)
-                query = query.Where(m => m.UploadedAt <= filter.DateTo.Value);
+                query = query.Where(m => m.UploadedAt <= filter.DateTo.Value && m.IdUser == idUser);
 
             if (filter.Type.HasValue)
-                query = query.Where(m => m.Type == filter.Type.Value);
+                query = query.Where(m => m.Type == filter.Type.Value && m.IdUser == idUser);
 
             if (filter.IsFavorite.HasValue)
-                query = query.Where(m => m.IsFavorite == filter.IsFavorite.Value);
+                query = query.Where(m => m.IsFavorite == filter.IsFavorite.Value && m.IdUser == idUser);
 
             if (!string.IsNullOrWhiteSpace(filter.SearchText))
-                query = query.Where(m => m.OriginalFileName.Contains(filter.SearchText));
+                query = query.Where(m => m.OriginalFileName.Contains(filter.SearchText) && m.IdUser == idUser);
             return query;
         }
 
-        public async Task<Pagination<MediaEntitie>> GetFavorites(int pageIndex, int pageSize) => await _context.Media
-        .Where(m => m.state == 1 && m.IsFavorite)
+        public async Task<Pagination<MediaEntitie>> GetFavorites(Guid idUser,int pageIndex, int pageSize) => await _context.Media
+        .Where(m => m.state == 1 && m.IsFavorite && m.IdUser == idUser)
         .ToPaginacionAsync(pageIndex, pageSize);
 
-        public async Task<Pagination<MediaEntitie>> GetMedia(int pageIndex, int pageSize) => await _context.Media
-                .Where(m => m.state == 1)
+        public async Task<Pagination<MediaEntitie>> GetMedia(Guid idUser,int pageIndex, int pageSize) => await _context.Media
+                .Where(m => m.state == 1 && m.IdUser == idUser)
                 .ToPaginacionAsync(pageIndex, pageSize);
 
-        public async Task<Pagination<MediaEntitie>> GetTrash(int pageIndex, int pageSize)
+        public async Task<Pagination<MediaEntitie>> GetTrash(Guid idUser,int pageIndex, int pageSize)
     => await _context.Media
-        .Where(m => m.state == 0 && m.DeletedAt != null)
+        .Where(m => m.state == 0 && m.DeletedAt != null && m.IdUser == idUser)
         .OrderByDescending(m => m.DeletedAt)
         .ToPaginacionAsync(pageIndex, pageSize);
 

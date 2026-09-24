@@ -7,6 +7,6 @@ namespace Abstracciones.Interfaces.Services
 {
     public interface IStorageServices
     {
-        Task<StorageResponse> GetTotalFileSizeBytes();
+        Task<StorageResponse> GetTotalFileSizeBytes(Guid idUser);
     }
 }

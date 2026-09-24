@@ -26,7 +26,7 @@ namespace Services
             if (albumRequest != null) 
             {
                 Guid albumId = Guid.NewGuid();
-                await _albumRepository.AddAlbum(new AlbumEntity { idAlbum=albumId, Name = albumRequest.Name, CreatedAt=DateTime.UtcNow, State=1, CoverMediaId=albumRequest.CoverMediaId });
+                await _albumRepository.AddAlbum(new AlbumEntity { idAlbum=albumId, Name = albumRequest.Name, CreatedAt=DateTime.UtcNow, State=1, CoverMediaId=albumRequest.CoverMediaId, IdUser=albumRequest.idUser });
                 return albumId;
             }
             else
@@ -62,7 +62,7 @@ namespace Services
         }
 
         public async Task<AlbumMediaResponse?> GetAlbumMedia(Guid idAlbum, int pageIndex, int pageSize) => await _albumRepository.GetAlbumMedia(idAlbum, pageIndex, pageSize);
-        public async Task<IEnumerable<AlbumEntity>> GetAlbums() => await _albumRepository.GetAlbums();
+        public async Task<IEnumerable<AlbumEntity>> GetAlbums(Guid idUser) => await _albumRepository.GetAlbums(idUser);
 
         private async Task<List<Guid>> ValidateDataAlbumMedia(AlbumMediaRequest albumMediaRequest) 
         {

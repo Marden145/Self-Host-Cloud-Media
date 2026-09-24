@@ -1,11 +1,15 @@
 using Abstracciones.Interfaces.Repository;
 using Abstracciones.Interfaces.Services;
+using Abstracciones.Models;
 using Abstracciones.Models.Options;
 using Abstracciones.Options;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Repository;
 using Repository.Context;
 using Services;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +18,23 @@ builder.WebHost.ConfigureKestrel(options =>
 {
     options.Limits.MaxRequestBodySize = 1L * 1024 * 1024 * 1024;
 });
+var tokenConfig = builder.Configuration.GetSection("Token").Get<TokenConfiguracion>()!;
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = tokenConfig.Issuer,
+            ValidAudience = tokenConfig.Audience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenConfig.Key)),
+            ClockSkew = TimeSpan.FromSeconds(30)
+        };
+    });
 builder.Services.AddControllers();
 builder.Services.AddScoped<IMediaServices, MediaServices>();
 builder.Services.AddScoped<IMediaRepository, MediaRepository>();
@@ -42,6 +63,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

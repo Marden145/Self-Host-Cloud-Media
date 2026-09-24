@@ -3,6 +3,7 @@ using Abstracciones.Interfaces.API;
 using Abstracciones.Interfaces.Services;
 using Abstracciones.Models;
 using Abstracciones.Models.Request;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
@@ -10,7 +11,8 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class MediaController : Controller, IMediaController
+    [Authorize]
+    public class MediaController : BaseApiController, IMediaController
     {
         private readonly IMediaServices _mediaServices;
         public MediaController(IMediaServices mediaServices)
@@ -31,7 +33,7 @@ namespace API.Controllers
         [HttpGet("Media/{pageIndex}/{pageSize}")]
         public async Task<IActionResult> GetMedia(int pageIndex, int pageSize) 
         {
-            Pagination<MediaEntitie> mediaEntity = await _mediaServices.GetMedia(pageIndex, pageSize);
+            Pagination<MediaEntitie> mediaEntity = await _mediaServices.GetMedia(CurrentUserId,pageIndex, pageSize);
             if(!mediaEntity.Items.Any())
                 return NotFound("No media found");
             return Ok(mediaEntity);
@@ -58,7 +60,7 @@ namespace API.Controllers
 
         public async Task<IActionResult> GetFavorites(int pageIndex, int pageSize)
         {
-            var favorites = await _mediaServices.GetFavorites(pageIndex, pageSize);
+            var favorites = await _mediaServices.GetFavorites(CurrentUserId, pageIndex, pageSize);
             if (!favorites.Items.Any())
                 return NotFound("No favorite media found.");
             return Ok(favorites);
@@ -69,7 +71,7 @@ namespace API.Controllers
         {
             if (filter == null)
                 return BadRequest("Filter criteria is required.");
-            var filteredMedia = await _mediaServices.FilterMedia(filter);
+            var filteredMedia = await _mediaServices.FilterMedia(CurrentUserId, filter);
             if (!filteredMedia.Items.Any())
                 return NotFound("No media found matching the filter criteria.");
             return Ok(filteredMedia);
@@ -78,7 +80,7 @@ namespace API.Controllers
 
         public async Task<IActionResult> GetTrash(int pageIndex, int pageSize)
         {
-            var trash = await _mediaServices.GetTrash(pageIndex, pageSize);
+            var trash = await _mediaServices.GetTrash(CurrentUserId, pageIndex, pageSize);
             if (!trash.Items.Any())
                 return NotFound("No media in trash.");
             return Ok(trash);

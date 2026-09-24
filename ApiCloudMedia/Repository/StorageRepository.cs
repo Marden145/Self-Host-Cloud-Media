@@ -12,6 +12,6 @@ namespace Repository
         private readonly CloudMediaDbContext _context;
         public StorageRepository(CloudMediaDbContext context) => _context = context;
 
-        public async Task<long> GetTotalFileSizeBytes() => await _context.Media.SumAsync(m => (long?)m.FileSize) ?? 0;
+        public async Task<long> GetTotalFileSizeBytes(Guid idUser) => await _context.Media.Where(m => m.IdUser == idUser).SumAsync(m => (long?)m.FileSize ) ?? 0;
     }
 }

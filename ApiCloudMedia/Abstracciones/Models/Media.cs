@@ -27,6 +27,7 @@ namespace Abstracciones.Models
     public class MediaRequest
     {
         public IFormFile File { get; set; }
+        public Guid idUser { get; set; }
     }
 
 }

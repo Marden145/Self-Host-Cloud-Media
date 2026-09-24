@@ -37,7 +37,7 @@ namespace Services
             await _mediaRepository.AddMedia(mediaEntity);
             return mediaEntity.Id;
         }
-        public async Task<Pagination<MediaEntitie>> GetMedia(int pageIndex, int pageSize) => await _mediaRepository.GetMedia(pageIndex, pageSize);
+        public async Task<Pagination<MediaEntitie>> GetMedia(Guid idUser, int pageIndex, int pageSize) => await _mediaRepository.GetMedia(idUser, pageIndex, pageSize);
         private string GetFileName(string extension)
         {
             return $"{Guid.NewGuid()}{extension}";
@@ -71,7 +71,8 @@ namespace Services
                 FileSize = mediaRequest.File.Length,
                 Type = DetermineMediaType(mediaRequest.File.ContentType),
                 UploadedAt = DateTimeOffset.UtcNow,
-                state = 1
+                state = 1,
+                IdUser = mediaRequest.idUser
             };
             return media;
         }
@@ -94,15 +95,13 @@ namespace Services
 
         public async Task<bool> SetFavorite(Guid idMedia, bool isFavorite) => await _mediaRepository.SetFavorite(idMedia, isFavorite);
 
-        public async Task<Pagination<MediaEntitie>> GetFavorites(int pageIndex, int pageSize) => await _mediaRepository.GetFavorites(pageIndex, pageSize);
+        public async Task<Pagination<MediaEntitie>> GetFavorites(Guid idUser,int pageIndex, int pageSize) => await _mediaRepository.GetFavorites(idUser,pageIndex, pageSize);
 
-        public async Task<Pagination<MediaEntitie>> FilterMedia(MediaFilterRequest filter) => await _mediaRepository.FilterMedia(filter);
+        public async Task<Pagination<MediaEntitie>> FilterMedia(Guid idUser,MediaFilterRequest filter) => await _mediaRepository.FilterMedia(idUser,filter);
 
-        public async Task<Pagination<MediaEntitie>> GetTrash(int pageIndex, int pageSize) => await _mediaRepository.GetTrash(pageIndex, pageSize);
+        public async Task<Pagination<MediaEntitie>> GetTrash(Guid idUser,int pageIndex, int pageSize) => await _mediaRepository.GetTrash(idUser,pageIndex, pageSize);
 
         public async Task<bool> RecoverMedia(Guid idMedia) => await _mediaRepository.RecoverMedia(idMedia);
-
-        
     }
 
 

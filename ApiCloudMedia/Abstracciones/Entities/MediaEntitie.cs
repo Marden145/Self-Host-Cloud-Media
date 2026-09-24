@@ -23,5 +23,7 @@ namespace Abstracciones.Entities
         public DateTimeOffset? DeletedAt { get; set; }
         public bool IsFavorite { get; set; } = false;
         public int state { get; set; }
+        public Guid IdUser { get; set; }              
+        public UserEntity User { get; set; }
     }
 }
