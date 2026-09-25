@@ -53,6 +53,16 @@ builder.Services.AddDbContext<CloudMediaDbContext>(options =>
 builder.Services.Configure<StorageOptions>(builder.Configuration.GetSection("Storage"));
 builder.Services.Configure<MediaOptions>(builder.Configuration.GetSection("Media"));
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("ReactApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -60,7 +70,7 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
-
+app.UseCors("ReactApp");
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
