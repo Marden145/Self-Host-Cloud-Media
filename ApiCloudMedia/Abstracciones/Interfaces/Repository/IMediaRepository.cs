@@ -10,7 +10,7 @@ namespace Abstracciones.Interfaces.Repository
 {
     public interface IMediaRepository
     {
-        Task AddMedia(MediaEntitie mediaEntity);
+        Task<MediaEntitie> AddMedia(MediaEntitie mediaEntity);
         Task<Pagination<MediaEntitie>> GetMedia(Guid idUser, int pageIndex, int pageSize);
         Task<int> CountByIdsAsync(List<Guid> mediaIds);
         Task DeleteMedia(List<Guid> idMedias);

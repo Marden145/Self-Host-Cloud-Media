@@ -15,10 +15,11 @@ namespace Repository
         private readonly CloudMediaDbContext _context;
         public MediaRepository(CloudMediaDbContext context) => _context = context;
 
-        public async Task AddMedia(MediaEntitie mediaEntity)
+        public async Task<MediaEntitie> AddMedia(MediaEntitie mediaEntity)
         {
             _context.Media.Add(mediaEntity);
             await _context.SaveChangesAsync();
+            return mediaEntity;
         }
 
         public async Task<int> CountByIdsAsync(List<Guid> mediaIds) => await _context.Media.CountAsync(m => mediaIds.Contains(m.Id) && m.state == 1);

@@ -5,6 +5,7 @@ using Abstracciones.Models.Options;
 using Abstracciones.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Repository;
 using Repository.Context;
@@ -64,6 +65,21 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+var mediaOptions = builder.Configuration.GetSection("Media").Get<MediaOptions>()!;
+
+if (!Directory.Exists(mediaOptions.StoragePath))
+    Directory.CreateDirectory(mediaOptions.StoragePath);
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(mediaOptions.StoragePath),
+    RequestPath = "/files",
+    OnPrepareResponse = ctx =>
+    {
+        // mínimo de seguridad: evita que el navegador reinterprete el tipo de archivo
+        ctx.Context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+    }
+});
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

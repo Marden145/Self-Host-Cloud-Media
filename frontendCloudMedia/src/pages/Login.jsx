@@ -20,6 +20,8 @@ function Login() {
       }
 
       console.log('Token recibido:', token.accessToken)
+      localStorage.setItem('accessToken', token.accessToken)
+
       // por ahora solo lo mostramos en consola para probar que funciona
       // luego aquí guardamos el token y redirigimos
     } catch (err) {

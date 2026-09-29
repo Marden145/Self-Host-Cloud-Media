@@ -13,7 +13,7 @@ namespace Abstracciones.Interfaces.Services
 {
     public interface IMediaServices
     {
-        Task<Guid> SaveMediaAsync(MediaRequest mediaRequest, CancellationToken cancellationToken);
+        Task<MediaEntitie> SaveMediaAsync(MediaRequest mediaRequest, CancellationToken cancellationToken);
         Task<Pagination<MediaEntitie>> GetMedia(Guid idUser, int pageIndex, int pageSize);
         Task<List<Guid>> DeleteMedia(List<Guid> idMedias);
         Task<bool> SetFavorite(Guid idMedia, bool isFavorite);

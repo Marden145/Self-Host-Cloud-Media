@@ -27,7 +27,10 @@ namespace API.Controllers
             {
                 return BadRequest("Invalid media request. The file is required.");
             }
+            mediaRequest.idUser = CurrentUserId;
             var result = await _mediaServices.SaveMediaAsync(mediaRequest, cancellationToken);
+            if(result==null)
+                return StatusCode(500, "An error occurred while saving the media.");
             return Ok(result);
         }
         [HttpGet("Media/{pageIndex}/{pageSize}")]

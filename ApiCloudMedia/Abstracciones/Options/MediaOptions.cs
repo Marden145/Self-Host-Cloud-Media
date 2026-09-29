@@ -7,5 +7,6 @@ namespace Abstracciones.Options
     public class MediaOptions
     {
         public string StoragePath { get; set; }
+        public string PublicBaseUrl { get; set; }
     }
 }

@@ -23,26 +23,25 @@ namespace Services
             _mediaRepository = mediaRepository;
             _mediaOptions = options.Value;
         }
-        public async Task<Guid> SaveMediaAsync(MediaRequest mediaRequest, CancellationToken cancellationToken)
+        public async Task<MediaEntitie> SaveMediaAsync(MediaRequest mediaRequest, CancellationToken cancellationToken)
         {
             var file = mediaRequest.File;
             string fileName = GetFileName(Path.GetExtension(file.FileName));
 
             await using var stream = file.OpenReadStream();
-            var storagePath = await SaveAsync(
+            await SaveAsync(
             stream,
             fileName,
             cancellationToken);
-            MediaEntitie mediaEntity = CreateMediaEntitie(mediaRequest, storagePath);
-            await _mediaRepository.AddMedia(mediaEntity);
-            return mediaEntity.Id;
+            MediaEntitie mediaEntity = CreateMediaEntitie(mediaRequest, fileName);
+            return await _mediaRepository.AddMedia(mediaEntity);
         }
         public async Task<Pagination<MediaEntitie>> GetMedia(Guid idUser, int pageIndex, int pageSize) => await _mediaRepository.GetMedia(idUser, pageIndex, pageSize);
         private string GetFileName(string extension)
         {
             return $"{Guid.NewGuid()}{extension}";
         }
-        private async Task<string> SaveAsync(Stream stream, string fileName, CancellationToken cancellationToken)
+        private async Task SaveAsync(Stream stream, string fileName, CancellationToken cancellationToken)
         {
             Directory.CreateDirectory(_mediaOptions.StoragePath);
             string fullPath = Path.Combine(_mediaOptions.StoragePath, fileName);
@@ -53,19 +52,16 @@ namespace Services
             FileShare.None,
             bufferSize: 64 * 1024,
             useAsync: true);
-
             await stream.CopyToAsync(
             fileStream,
             cancellationToken);
-
-            return fullPath;
         }
-        private MediaEntitie CreateMediaEntitie(MediaRequest mediaRequest,string storagePath) 
+        private MediaEntitie CreateMediaEntitie(MediaRequest mediaRequest,string fileName) 
         {
             var media = new MediaEntitie
             {
                 Id = Guid.NewGuid(),
-                StoragePath = storagePath,
+                StoragePath = fileName,
                 OriginalFileName = mediaRequest.File.FileName,
                 ContentType = mediaRequest.File.ContentType,
                 FileSize = mediaRequest.File.Length,
