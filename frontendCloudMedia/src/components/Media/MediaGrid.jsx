@@ -1,7 +1,7 @@
 import { ImageOff } from 'lucide-react'
 import { MediaTile } from './MediaTile'
 import { motion } from 'framer-motion'
-export function MediaGrid({ items, onOpen, onToggleFavorite, emptyMessage = 'No hay archivos todavía' }) {
+export function MediaGrid({ items, onOpen, onToggleFavorite, onDelete, onRecover, emptyMessage = 'No hay archivos todavía' }) {
   if (items.length === 0) {
     return (
       <div className="mx-4 flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed px-6 py-20 text-center lg:mx-8">
@@ -24,6 +24,8 @@ export function MediaGrid({ items, onOpen, onToggleFavorite, emptyMessage = 'No 
             item={item}
             onOpen={() => onOpen(item.id)}
             onToggleFavorite={onToggleFavorite}
+            onDelete={onDelete}
+            onRecover={onRecover}
           />
         </motion.li>
       ))}

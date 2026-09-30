@@ -37,8 +37,6 @@ namespace API.Controllers
         public async Task<IActionResult> GetMedia(int pageIndex, int pageSize) 
         {
             Pagination<MediaEntitie> mediaEntity = await _mediaServices.GetMedia(CurrentUserId,pageIndex, pageSize);
-            if(!mediaEntity.Items.Any())
-                return NotFound("No media found");
             return Ok(mediaEntity);
         }
 
@@ -64,8 +62,6 @@ namespace API.Controllers
         public async Task<IActionResult> GetFavorites(int pageIndex, int pageSize)
         {
             var favorites = await _mediaServices.GetFavorites(CurrentUserId, pageIndex, pageSize);
-            if (!favorites.Items.Any())
-                return NotFound("No favorite media found.");
             return Ok(favorites);
         }
         [HttpGet("filterMedia")]
@@ -75,8 +71,6 @@ namespace API.Controllers
             if (filter == null)
                 return BadRequest("Filter criteria is required.");
             var filteredMedia = await _mediaServices.FilterMedia(CurrentUserId, filter);
-            if (!filteredMedia.Items.Any())
-                return NotFound("No media found matching the filter criteria.");
             return Ok(filteredMedia);
         }
         [HttpGet("trash/{pageIndex}/{pageSize}")]
@@ -84,8 +78,6 @@ namespace API.Controllers
         public async Task<IActionResult> GetTrash(int pageIndex, int pageSize)
         {
             var trash = await _mediaServices.GetTrash(CurrentUserId, pageIndex, pageSize);
-            if (!trash.Items.Any())
-                return NotFound("No media in trash.");
             return Ok(trash);
         }
         [HttpPatch("recoverMedia/{idMedia}")]

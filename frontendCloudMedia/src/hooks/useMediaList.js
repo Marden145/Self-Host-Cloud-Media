@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-
+import { saveMedia, setFavorites, deleteMedia, recoverMedia } from '../services/mediaService'
 export function useMediaList(fetchPage, pageSize = 30) {
   // guardamos la función de fetch en un ref para no reiniciar la carga
   // cada vez que el componente que llama al hook se re-renderiza
@@ -59,5 +59,50 @@ export function useMediaList(fetchPage, pageSize = 30) {
     setItems((prev) => prev.filter((i) => i.id !== id))
   }, [])
 
-  return { items, loading, loadingMore, error, hasMorePages, loadMore, addItem, updateItem, removeItem }
+  const handleAddMedia = useCallback(async (files) => {
+    for (const file of files) {
+      const formData = new FormData()
+      formData.append('file', file)
+      const saved = await saveMedia(formData)
+      addItem(saved)
+    }
+  }, [addItem])
+
+  
+  const handleToggleFavorite = useCallback(async (item) => {
+    const nextValue = !item.isFavorite
+    updateItem(item.id, { isFavorite: nextValue })
+    try {
+      await setFavorites(item.id, nextValue)
+    } catch (err) {
+      updateItem(item.id, { isFavorite: item.isFavorite })
+      console.error(err)
+    }
+  }, [updateItem])
+
+  const handleDelete = useCallback(async (item) => {
+    removeItem(item.id)
+    try {
+      await deleteMedia([item.id])
+    } catch (err) {
+      addItem(item)
+      console.error(err)
+    }
+  }, [removeItem, addItem])
+
+  const handleRecover = useCallback(async (item) => {
+    removeItem(item.id)
+    try {
+      await recoverMedia(item.id)
+    } catch (err) {
+      addItem(item)
+      console.error(err)
+    }
+  }, [removeItem, addItem])
+
+  return {
+    items, loading, loadingMore, error, hasMorePages, loadMore,
+    addItem, updateItem, removeItem,
+    handleAddMedia, handleToggleFavorite, handleDelete, handleRecover,
+  }
 }

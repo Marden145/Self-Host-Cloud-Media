@@ -9,27 +9,18 @@ import { getFavorites, saveMedia, setFavorites } from '../services/mediaService'
 
 function Favorites() {
   const {
-    items, loading, loadingMore, error, hasMorePages,
-    loadMore, addItem, updateItem, removeItem,
+    items, loading, loadingMore, error, hasMorePages, loadMore,
+    handleAddMedia, addItem, removeItem,handleDelete
   } = useMediaList(getFavorites)
 
   const [openIndex, setOpenIndex] = useState(-1)
 
-  const handleAddMedia = async (files) => {
-    for (const file of files) {
-      const formData = new FormData()
-      formData.append('file', file)
-      await saveMedia(formData) 
-    }
-  }
-
-  const handleToggleFavorite = async (item) => {
-   
+  const handleUnfavorite = async (item) => {
     removeItem(item.id)
     try {
       await setFavorites(item.id, false)
     } catch (err) {
-      addItem(item) 
+      addItem(item)
       console.error(err)
     }
   }
@@ -47,8 +38,9 @@ function Favorites() {
             <MediaGrid
               items={items}
               onOpen={(id) => setOpenIndex(items.findIndex((i) => i.id === id))}
-              onToggleFavorite={handleToggleFavorite}
+              onToggleFavorite={handleUnfavorite}
               emptyMessage="Aún no tienes favoritos"
+              onDelete={handleDelete}
             />
           )}
           {loadingMore && <p className="text-center text-sm text-muted-foreground">Cargando más...</p>}
@@ -64,7 +56,8 @@ function Favorites() {
             onClose={() => setOpenIndex(-1)}
             onNeedMore={loadMore}
             hasMorePages={hasMorePages}
-            onToggleFavorite={handleToggleFavorite}
+            onToggleFavorite={handleUnfavorite}
+            onDelete={handleDelete} 
           />
         )}
       </AnimatePresence>
