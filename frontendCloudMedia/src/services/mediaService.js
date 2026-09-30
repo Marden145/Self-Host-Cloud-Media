@@ -7,8 +7,8 @@ export async function getMedia(pageIndex, pageSize) {
   const response = await api.get(`/Media/Media/${pageIndex}/${pageSize}`)
   return response.data
 }
-export async function setFavorites(idMedia,setFavoritesRequest) {
-  const response = await api.patch(`/Media/DeleteMedia/${idMedia}`, setFavoritesRequest)
+export async function setFavorites(idMedia,isFavorite) {
+  const response = await api.patch(`/Media/${idMedia}/favorite`, { isFavorite })
   return response.data
 }
 export async function getFavorites(pageIndex, pageSize) {

@@ -1,11 +1,12 @@
-import { Aperture, BookImage, Heart, Images, Sparkles, Trash2, Users } from 'lucide-react'
+import { Aperture, BookImage, Heart, Images, Trash2 } from 'lucide-react'
 import { cn } from '../../utils/utils'
+import { NavLink } from 'react-router-dom'
 
 const NAV = [
-  { label: 'Biblioteca', icon: Images, active: true },
-  { label: 'Favoritos', icon: Heart },
-  { label: 'Álbumes', icon: BookImage },
-  { label: 'Papelera', icon: Trash2 },
+  { label: 'Biblioteca', icon: Images, to: '/galeria' },
+  { label: 'Favoritos', icon: Heart, to: '/favoritos' },
+  { label: 'Álbumes', icon: BookImage, to: '/albumes' },
+  { label: 'Papelera', icon: Trash2, to: '/papelera' },
 ]
 
 export function Logo() {
@@ -27,19 +28,22 @@ export function Sidebar() {
       </div>
       <nav aria-label="Principal" className="mt-8">
         <ul className="flex flex-col gap-1">
-          {NAV.map(({ label, icon: Icon, active }) => (
-            <li key={label}
-                href="#"
-                aria-current={active ? 'page' : undefined}
-                className={cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                  active
-                    ? 'bg-foreground text-background'
-                    : 'text-muted-foreground hover:bg-sidebar-accent hover:text-foreground',
-                )}
+          {NAV.map(({ label, icon: Icon, to }) => (
+            <li key={label}>
+              <NavLink
+                to={to}
+                className={({ isActive }) =>
+                  cn(
+                    'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                    isActive
+                      ? 'bg-foreground text-background'
+                      : 'text-muted-foreground hover:bg-sidebar-accent hover:text-foreground',
+                  )
+                }
               >
                 <Icon className="size-4" aria-hidden="true" />
                 {label}
+              </NavLink>
             </li>
           ))}
         </ul>
