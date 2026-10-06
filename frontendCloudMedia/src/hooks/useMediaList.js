@@ -10,6 +10,7 @@ export function useMediaList(fetchPage, pageSize = 30) {
 
   const [items, setItems] = useState([])
   const [pageIndex, setPageIndex] = useState(1)
+  const [meta, setMeta] = useState({})
   const [totalPages, setTotalPages] = useState(1)
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
@@ -18,13 +19,20 @@ export function useMediaList(fetchPage, pageSize = 30) {
   const hasMorePages = pageIndex < totalPages
 
   const loadPage = useCallback(async (page) => {
-    const data = await fetchPageRef.current(page, pageSize)
+    const raw = await fetchPageRef.current(page, pageSize)
+    const paged = raw.media ?? raw // soporta respuesta "plana" o "envuelta" (como la de álbumes)
+
+    if (raw.media) {
+      const { media, ...rest } = raw
+      setMeta(rest) // guarda name, idAlbum, createdAt, etc. — lo que venga aparte de "media"
+    }
+
     setItems((prev) => {
       const existingIds = new Set(prev.map((i) => i.id))
-      const newItems = data.items.filter((i) => !existingIds.has(i.id))
+      const newItems = paged.items.filter((i) => !existingIds.has(i.id))
       return [...prev, ...newItems]
     })
-    setTotalPages(data.totalPages)
+    setTotalPages(paged.totalPages)
   }, [pageSize])
 
   useEffect(() => {
@@ -101,7 +109,7 @@ export function useMediaList(fetchPage, pageSize = 30) {
   }, [removeItem, addItem])
 
   return {
-    items, loading, loadingMore, error, hasMorePages, loadMore,
+    items, loading, meta,loadingMore, error, hasMorePages, loadMore,
     addItem, updateItem, removeItem,
     handleAddMedia, handleToggleFavorite, handleDelete, handleRecover,
   }
