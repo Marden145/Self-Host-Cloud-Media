@@ -23,6 +23,7 @@ namespace API.Controllers
         {
             if(albumRequest==null)
                 return BadRequest("Invalid album request");
+            albumRequest.idUser= CurrentUserId;
             return Ok(await _albumServices.AddAlbum(albumRequest));
         }
 

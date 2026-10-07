@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion'
-import { Images } from 'lucide-react'
+import { Images,Trash2  } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
-export function AlbumCard({ album, index = 0 }) {
+export function AlbumCard({ album, index = 0, onDelete }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -17,6 +17,19 @@ export function AlbumCard({ album, index = 0 }) {
         </div>
         <p className="mt-2 truncate text-sm font-medium">{album.name}</p>
       </Link>
+       {onDelete && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault() // evita que el Link navegue al hacer clic en el ícono
+            onDelete(album)
+          }}
+          aria-label={`Eliminar álbum ${album.name}`}
+          className="absolute right-1.5 top-1.5 flex size-7 items-center justify-center rounded-full bg-black/40 text-white opacity-0 backdrop-blur-sm transition-opacity hover:bg-black/60 focus-visible:opacity-100 group-hover:opacity-100"
+        >
+          <Trash2 className="size-3.5" aria-hidden="true" />
+        </button>
+      )}
     </motion.div>
   )
 }

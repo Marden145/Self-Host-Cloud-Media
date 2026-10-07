@@ -1,26 +1,17 @@
-import { useEffect, useState } from 'react'
+import {  useState } from 'react'
 import { FolderPlus } from 'lucide-react'
-import { Sidebar } from '../components/Sidebar'
-import { TopBar } from '../components/TopBar'
-import { AlbumCard } from '../components/AlbumCard'
+import { Sidebar } from '../components/Media/Sidebar'
+import { TopBar } from '../components/Media/TopBar'
+import { AlbumCard } from '../components/Album/AlbumCard'
 import { Modal } from '../components/Modal'
+import { AlbumForm } from '../components/Album/AlbumForm'
 import { saveMedia } from '../services/mediaService'
-import { getAlbums, addAlbum } from '../services/albumService'
-
+import { useAlbums } from '../hooks/useAlbums'
+import { AnimatePresence } from 'framer-motion'
 function Albums() {
-  const [albums, setAlbums] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+const { albums, loading, error, handleCreateAlbum, handleDeleteAlbum } = useAlbums()
   const [modalOpen, setModalOpen] = useState(false)
-  const [newName, setNewName] = useState('')
   const [creating, setCreating] = useState(false)
-
-  useEffect(() => {
-    getAlbums()
-      .then(setAlbums)
-      .catch((err) => { setError('No se pudieron cargar los álbumes.'); console.error(err) })
-      .finally(() => setLoading(false))
-  }, [])
 
   const handleAddMedia = async (files) => {
     for (const file of files) {
@@ -30,15 +21,10 @@ function Albums() {
     }
   }
 
-  const handleCreateAlbum = async (e) => {
-    e.preventDefault()
-    if (!newName.trim()) return
+  const onCreateSubmit = async (name) => {
     setCreating(true)
     try {
-      await addAlbum(newName.trim())
-      const refreshed = await getAlbums() // más simple y confiable que asumir la forma exacta de la respuesta
-      setAlbums(refreshed)
-      setNewName('')
+      await handleCreateAlbum(name)
       setModalOpen(false)
     } catch (err) {
       console.error(err)
@@ -47,7 +33,9 @@ function Albums() {
     }
   }
 
-  return (
+ 
+
+ return (
     <div className="flex min-h-dvh">
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col">
@@ -83,49 +71,20 @@ function Albums() {
 
           {!loading && !error && albums.length > 0 && (
             <ul className="grid grid-cols-2 gap-4 px-4 sm:grid-cols-3 md:grid-cols-4 lg:px-8 2xl:grid-cols-6">
-              {albums.map((album, i) => (
-                <li key={album.idAlbum}>
-                  <AlbumCard album={album} index={i} />
-                </li>
-              ))}
+              <AnimatePresence>
+                {albums.map((album, i) => (
+                  <li key={album.idAlbum}>
+                    <AlbumCard album={album} index={i} onDelete={() => handleDeleteAlbum(album.idAlbum)} />
+                  </li>
+                ))}
+              </AnimatePresence>
             </ul>
           )}
         </main>
       </div>
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Nuevo álbum">
-        <form onSubmit={handleCreateAlbum} className="flex flex-col gap-4">
-          <div>
-            <label htmlFor="album-name" className="text-sm font-medium text-muted-foreground">
-              Nombre del álbum
-            </label>
-            <input
-              id="album-name"
-              type="text"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              placeholder="Ej. Vacaciones 2026"
-              autoFocus
-              className="mt-1.5 h-10 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none transition-shadow focus-visible:ring-2 focus-visible:ring-ring"
-            />
-          </div>
-          <div className="flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={() => setModalOpen(false)}
-              className="h-10 rounded-full px-4 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={creating || !newName.trim()}
-              className="h-10 rounded-full bg-highlight px-4 text-sm font-medium text-highlight-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
-            >
-              {creating ? 'Creando...' : 'Crear álbum'}
-            </button>
-          </div>
-        </form>
+        <AlbumForm onSubmit={onCreateSubmit} onCancel={() => setModalOpen(false)} submitting={creating} />
       </Modal>
     </div>
   )
