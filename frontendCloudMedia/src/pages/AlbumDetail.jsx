@@ -14,22 +14,27 @@ function AlbumDetailInner({ idAlbum }) {
   const navigate = useNavigate()
 
   const {
-    items, meta, loading, loadingMore, error, hasMorePages, loadMore, handleToggleFavorite,handleAddAlbumMedia
+    items, meta, loading, loadingMore, error, hasMorePages, loadMore, handleToggleFavorite
   } = useMediaList((page, pageSize) => getAlbumMedia(idAlbum, page, pageSize), { idAlbum })
 
   const [openIndex, setOpenIndex] = useState(-1)
   const [pickerOpen, setPickerOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
+
 const handleDeleteAlbumClick = async () => {
   setDeleting(true)
   try {
-    await deleteAlbum(idAlbum) // directo al service, sin el hook completo de la lista
+    await deleteAlbum(idAlbum) 
     navigate('/albumes')
   } catch (err) {
     console.error(err)
     setDeleting(false)
   }
 }
+const handleAddAlbumMedia = async (selectedItems) => {
+    await addAlbumMedia(idAlbum, selectedItems.map((i) => i.id))
+    selectedItems.forEach(addItem) 
+  }
  return (
     <div className="flex min-h-dvh">
       <Sidebar />

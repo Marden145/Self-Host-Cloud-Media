@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { saveMedia, setFavorites, deleteMedia, recoverMedia } from '../services/mediaService'
 import {  addAlbumMedia } from '../services/albumService'
-export function useMediaList(fetchPage, { pageSize = 30, idAlbum } = {}) {
+export function useMediaList(fetchPage, { pageSize = 30 } = {}) {
   // guardamos la función de fetch en un ref para no reiniciar la carga
   // cada vez que el componente que llama al hook se re-renderiza
   const fetchPageRef = useRef(fetchPage)
@@ -108,19 +108,12 @@ export function useMediaList(fetchPage, { pageSize = 30, idAlbum } = {}) {
       console.error(err)
     }
   }, [removeItem, addItem])
-  const handleAddAlbumMedia = useCallback(async (idMedias) => {
-    if (!idAlbum) throw new Error('useMediaList: idAlbum es requerido para handleAddAlbumMedia')
-    await addAlbumMedia(idAlbum, idMedias)
-    // refresca trayendo la página 1 de nuevo para ver las fotos agregadas al toque
-    setItems([])
-    setPageIndex(1)
-    setTotalPages(1)
-    await loadPage(1)
-  }, [idAlbum, loadPage])
+
+
 
   return {
     items, loading, meta,loadingMore, error, hasMorePages, loadMore,
     addItem, updateItem, removeItem,
-    handleAddMedia, handleToggleFavorite, handleDelete, handleRecover,handleAddAlbumMedia,
+    handleAddMedia, handleToggleFavorite, handleDelete, handleRecover,
   }
 }
