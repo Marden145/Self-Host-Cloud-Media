@@ -17,6 +17,7 @@ namespace Abstracciones.Models
         public DateTimeOffset UploadedAt { get; set; }
         public DateTimeOffset? CapturedAt { get; set; }
         public int state { get; set; }
+        public bool IsFavorite { get; set; } = false;
     }
 
     public class MediaResponse : MediaBase

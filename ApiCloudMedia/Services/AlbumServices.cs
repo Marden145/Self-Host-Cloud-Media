@@ -21,13 +21,12 @@ namespace Services
             _albumRepository = albumRepository;
             _mediaRepository = mediaRepository;
         }
-        public async Task<Guid> AddAlbum(AlbumRequest albumRequest)
+        public async Task<AlbumEntity> AddAlbum(AlbumRequest albumRequest)
         {
             if (albumRequest != null) 
             {
                 Guid albumId = Guid.NewGuid();
-                await _albumRepository.AddAlbum(new AlbumEntity { idAlbum=albumId, Name = albumRequest.Name, CreatedAt=DateTime.UtcNow, State=1, CoverMediaId=albumRequest.CoverMediaId, IdUser=albumRequest.idUser });
-                return albumId;
+                return await _albumRepository.AddAlbum(new AlbumEntity { idAlbum=albumId, Name = albumRequest.Name, CreatedAt=DateTime.UtcNow, State=1, CoverMediaId=albumRequest.CoverMediaId, IdUser=albumRequest.idUser });
             }
             else
             {

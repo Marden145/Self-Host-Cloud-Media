@@ -7,15 +7,14 @@ import { TopBar } from '../components/Media/TopBar'
 import { MediaGrid } from '../components/Media/MediaGrid'
 import { Lightbox } from '../components/Media/Lightbox'
 import { useMediaList } from '../hooks/useMediaList'
-import { getAlbumMedia } from '../services/albumService'
-import { deleteAlbum } from '../services/albumService'
+import { getAlbumMedia,deleteAlbum,addAlbumMedia,deleteAlbumMedia  } from '../services/albumService'
 import { MediaPickerModal } from '../components/Media/MediaPickerModal'
 function AlbumDetailInner({ idAlbum }) {
   const navigate = useNavigate()
 
   const {
-    items, meta, loading, loadingMore, error, hasMorePages, loadMore, handleToggleFavorite
-  } = useMediaList((page, pageSize) => getAlbumMedia(idAlbum, page, pageSize), { idAlbum })
+    items, meta, loading, loadingMore, error, hasMorePages, loadMore, handleToggleFavorite,addItem,removeItem
+  } = useMediaList((page, pageSize) => getAlbumMedia( idAlbum,page, pageSize))
 
   const [openIndex, setOpenIndex] = useState(-1)
   const [pickerOpen, setPickerOpen] = useState(false)
@@ -34,6 +33,15 @@ const handleDeleteAlbumClick = async () => {
 const handleAddAlbumMedia = async (selectedItems) => {
     await addAlbumMedia(idAlbum, selectedItems.map((i) => i.id))
     selectedItems.forEach(addItem) 
+  }
+  const handleRemoveFromAlbum = async (item) => {
+    removeItem(item.id) 
+    try {
+      await deleteAlbumMedia(idAlbum, [item.id])
+    } catch (err) {
+      addItem(item) // si falla, lo regresamos
+      console.error(err)
+    }
   }
  return (
     <div className="flex min-h-dvh">
@@ -82,6 +90,7 @@ const handleAddAlbumMedia = async (selectedItems) => {
               items={items}
               onOpen={(id) => setOpenIndex(items.findIndex((i) => i.id === id))}
               onToggleFavorite={handleToggleFavorite}
+              onDelete={handleRemoveFromAlbum}
               emptyMessage="Este álbum no tiene fotos todavía"
             />
           )}
@@ -99,6 +108,7 @@ const handleAddAlbumMedia = async (selectedItems) => {
             onNeedMore={loadMore}
             hasMorePages={hasMorePages}
             onToggleFavorite={handleToggleFavorite}
+            onDelete={handleRemoveFromAlbum}
           />
         )}
       </AnimatePresence>

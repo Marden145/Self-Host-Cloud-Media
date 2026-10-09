@@ -21,6 +21,7 @@ export function useMediaList(fetchPage, { pageSize = 30 } = {}) {
 
   const loadPage = useCallback(async (page) => {
     const raw = await fetchPageRef.current(page, pageSize)
+    console.log(raw)
     const paged = raw.media ?? raw // soporta respuesta "plana" o "envuelta" (como la de álbumes)
 
     if (raw.media) {
@@ -33,6 +34,7 @@ export function useMediaList(fetchPage, { pageSize = 30 } = {}) {
       const newItems = paged.items.filter((i) => !existingIds.has(i.id))
       return [...prev, ...newItems]
     })
+    
     setTotalPages(paged.totalPages)
   }, [pageSize])
 

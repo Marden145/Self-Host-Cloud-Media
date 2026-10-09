@@ -9,7 +9,7 @@ namespace Abstracciones.Interfaces.Services
 {
     public interface IAlbumServices
     {
-        Task<Guid> AddAlbum(AlbumRequest albumRequest);
+        Task<AlbumEntity> AddAlbum(AlbumRequest albumRequest);
         Task<Guid> AddAlbumMedia(AlbumMediaRequest albumMediaRequest);
         Task<Guid> DeleteAlbum(Guid idAlbum);
         Task<Guid> DeleteAlbumMedia(Guid idAlbum, List<Guid> idMedias);

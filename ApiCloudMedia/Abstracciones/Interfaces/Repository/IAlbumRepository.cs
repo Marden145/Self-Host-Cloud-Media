@@ -9,7 +9,7 @@ namespace Abstracciones.Interfaces.Repository
 {
     public interface IAlbumRepository
     {
-        Task AddAlbum(AlbumEntity albumEntity);
+        Task<AlbumEntity> AddAlbum(AlbumEntity albumEntity);
         Task AddAlbumMedia(IEnumerable<AlbumMediaEntity> albumMediaEntity);
         Task<bool> AlbumExists(Guid albumId);
         Task<List<Guid>> GetExistingMediaIdsAsync(Guid albumId, List<Guid> mediaIds);

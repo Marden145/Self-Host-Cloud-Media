@@ -14,10 +14,11 @@ namespace Repository
         private readonly CloudMediaDbContext _context;
         public AlbumRepository(CloudMediaDbContext context) => _context = context;
 
-        public async Task AddAlbum(AlbumEntity albumEntity)
+        public async Task<AlbumEntity> AddAlbum(AlbumEntity albumEntity)
         {
             _context.Album.Add(albumEntity);
             await _context.SaveChangesAsync();
+            return albumEntity;
         }
 
         public async Task AddAlbumMedia(IEnumerable<AlbumMediaEntity> albumMediaEntity)
@@ -98,7 +99,8 @@ namespace Repository
                     Duration = am.Media.Duration,
                     UploadedAt = am.Media.UploadedAt,
                     CapturedAt = am.Media.CapturedAt,
-                    state = am.Media.state
+                    state = am.Media.state,
+                    IsFavorite = am.Media.IsFavorite
                 }).ToPaginacionAsync(pageIndex, pageSize);
     }
 }

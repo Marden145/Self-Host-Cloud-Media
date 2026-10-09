@@ -47,7 +47,7 @@ export function MediaTile({ item, onOpen, onToggleFavorite, onDelete, onRecover 
           type="button"
           onClick={(e) => { e.stopPropagation(); onDelete(item) }}
           aria-label="Mover a la papelera"
-          className={cn(iconButtonClass, 'absolute left-2 top-2 z-10 opacity-0 focus-visible:opacity-100 group-hover:opacity-100')}
+          className={cn(iconButtonClass, 'absolute left-2 top-2 z-10 opacity-0 focus-visible:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100')}
         >
           <Trash2 className="size-4" aria-hidden="true" />
         </button>
@@ -58,7 +58,7 @@ export function MediaTile({ item, onOpen, onToggleFavorite, onDelete, onRecover 
           type="button"
           onClick={(e) => { e.stopPropagation(); onRecover(item) }}
           aria-label="Recuperar de la papelera"
-          className={cn(iconButtonClass, 'absolute left-2 top-2 z-10')}
+          className={cn(iconButtonClass, 'absolute left-2 top-2 z-10 [@media(hover:none)]:opacity-100')}
         >
           <RotateCcw className="size-4" aria-hidden="true" />
         </button>
@@ -72,7 +72,7 @@ export function MediaTile({ item, onOpen, onToggleFavorite, onDelete, onRecover 
           aria-pressed={item.isFavorite}
           className={cn(
             iconButtonClass,
-            'absolute right-2 top-2 z-10',
+            'absolute right-2 top-2 z-10 [@media(hover:none)]:opacity-100',
             item.isFavorite ? 'opacity-100' : 'opacity-0 focus-visible:opacity-100 group-hover:opacity-100',
           )}
         >

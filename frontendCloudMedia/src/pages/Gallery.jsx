@@ -5,7 +5,7 @@ import { TopBar } from '../components/Media/TopBar'
 import { MediaGrid } from '../components/Media/MediaGrid'
 import { Lightbox } from '../components/Media/Lightbox'
 import { useMediaList } from '../hooks/useMediaList'
-import { getMedia, saveMedia, setFavorites } from '../services/mediaService'
+import { getMedia } from '../services/mediaService'
 
 function Gallery() {
   const {

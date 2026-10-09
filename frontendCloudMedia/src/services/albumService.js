@@ -23,3 +23,8 @@ export async function addAlbumMedia(idAlbum, idMedias) {
   const response = await api.post('/Album/AddAlbumMedia', { idAlbum, IdMedias: idMedias })
   return response.data
 }
+
+export async function deleteAlbumMedia(idAlbum, idMedias) {
+  const response = await api.delete(`/Album/DeleteAlbumMedia/${idAlbum}`, { data: idMedias })
+  return response.data
+}

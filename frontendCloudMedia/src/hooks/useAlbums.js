@@ -20,9 +20,11 @@ export function useAlbums() {
   }, [refresh])
 
   const handleCreateAlbum = useCallback(async (name) => {
-    await addAlbum(name)
-    await refresh()
-  }, [refresh])
+    const created = await addAlbum(name)
+    setAlbums((prev) =>
+      prev.some((a) => a.idAlbum === created.idAlbum) ? prev : [created, ...prev],
+    )
+  }, [])
 
   const handleDeleteAlbum = useCallback(async (idAlbum) => {
     setAlbums((prev) => prev.filter((a) => a.idAlbum !== idAlbum)) // optimista
