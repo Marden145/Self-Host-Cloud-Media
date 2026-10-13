@@ -1,29 +1,34 @@
 import { useState } from 'react'
 import { GoogleLogin } from '@react-oauth/google'
 import { loginWithGoogle } from '../services/authService'
-
+import { useAuth } from '../context/AuthContext'
+import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 function Login() {
+  const { login, isAuthenticated } = useAuth()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const from = location.state?.from?.pathname ?? '/galeria'
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
+
+  if (isAuthenticated) return <Navigate to={from} replace />
 
   const handleSuccess = async (credentialResponse) => {
     setError(null)
     setLoading(true)
 
     try {
-      const idToken = credentialResponse.credential
-      const token = await loginWithGoogle(idToken)
+      const token = await loginWithGoogle(credentialResponse.credential)
 
       if (!token.validacionExitosa) {
         setError('No se pudo iniciar sesión con Google.')
         return
       }
 
-      console.log('Token recibido:', token.accessToken)
-      localStorage.setItem('accessToken', token.accessToken)
-
-      // por ahora solo lo mostramos en consola para probar que funciona
-      // luego aquí guardamos el token y redirigimos
+     
+      login(token)
+      navigate(from, { replace: true })
+       console.log('Token recibido:', token.accessToken)
     } catch (err) {
       setError('Ocurrió un error al conectar con el servidor.')
       console.error(err)

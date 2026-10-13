@@ -14,12 +14,16 @@ const { albums, loading, error, handleCreateAlbum, handleDeleteAlbum } = useAlbu
   const [creating, setCreating] = useState(false)
 
   const handleAddMedia = async (files) => {
+  try {
     for (const file of files) {
       const formData = new FormData()
       formData.append('file', file)
       await saveMedia(formData)
     }
+  } finally {
+    refreshStorage()
   }
+}
 
   const onCreateSubmit = async (name) => {
     setCreating(true)

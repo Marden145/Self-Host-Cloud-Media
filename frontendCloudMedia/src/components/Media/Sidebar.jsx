@@ -1,6 +1,7 @@
 import { Aperture, BookImage, Heart, Images, Trash2 } from 'lucide-react'
 import { cn } from '../../utils/utils'
 import { NavLink } from 'react-router-dom'
+import { StorageCard } from '../Storage/StorageCard'
 
 const NAV = [
   { label: 'Biblioteca', icon: Images, to: '/galeria' },
@@ -20,18 +21,20 @@ export function Logo() {
   )
 }
 
-export function Sidebar() {
+export function SidebarContent({ onNavigate }) {
   return (
-    <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r bg-sidebar px-4 py-5 lg:flex">
+    <>
       <div className="px-2">
         <Logo />
       </div>
+
       <nav aria-label="Principal" className="mt-8">
         <ul className="flex flex-col gap-1">
           {NAV.map(({ label, icon: Icon, to }) => (
             <li key={label}>
               <NavLink
                 to={to}
+                onClick={onNavigate}
                 className={({ isActive }) =>
                   cn(
                     'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
@@ -48,6 +51,18 @@ export function Sidebar() {
           ))}
         </ul>
       </nav>
+
+      <div className="mt-auto pt-6">
+        <StorageCard />
+      </div>
+    </>
+  )
+}
+
+export function Sidebar() {
+  return (
+    <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r bg-sidebar px-4 py-5 lg:flex">
+      <SidebarContent />
     </aside>
   )
 }

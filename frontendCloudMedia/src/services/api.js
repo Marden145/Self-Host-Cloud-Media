@@ -3,7 +3,9 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
 })
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('accessToken')
+  const tokenData = JSON.parse(localStorage.getItem('TokenResponse'))
+  const token = tokenData?.accessToken ?? tokenData?.AccessToken
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
@@ -14,10 +16,9 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('accessToken')
-      window.location.href = '/login'
+      window.dispatchEvent(new Event('auth:expired')) 
     }
     return Promise.reject(error)
-  }
+  },
 )
 export default api

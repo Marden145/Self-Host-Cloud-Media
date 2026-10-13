@@ -5,20 +5,31 @@ import Favorites from './pages/Favorites'
 import Trash from './pages/Trash'
 import Albums from './pages/Albums'
 import AlbumDetail from './pages/AlbumDetail'
+import { AuthProvider } from './context/AuthContext'
+import { StorageProvider } from './context/StorageContext'
+import { PrivateRoute } from './components/PrivateRoute'
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/galeria" element={<Gallery />} />
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/favoritos" element={<Favorites />} />
-        <Route path="/papelera" element={<Trash />} />
-        <Route path="/albumes" element={<Albums />} />
-<Route path="/albumes/:idAlbum" element={<AlbumDetail />} />
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <StorageProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* pública */}
+            <Route path="/login" element={<Login />} />
+
+            {/* protegidas: cada página ya incluye su Sidebar y TopBar */}
+            <Route path="/galeria" element={<PrivateRoute><Gallery /></PrivateRoute>} />
+            <Route path="/favoritos" element={<PrivateRoute><Favorites /></PrivateRoute>} />
+            <Route path="/papelera" element={<PrivateRoute><Trash /></PrivateRoute>} />
+            <Route path="/albumes" element={<PrivateRoute><Albums /></PrivateRoute>} />
+            <Route path="/albumes/:idAlbum" element={<PrivateRoute><AlbumDetail /></PrivateRoute>} />
+
+            <Route path="/" element={<Navigate to="/galeria" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </StorageProvider>
+    </AuthProvider>
   )
 }
 

@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { saveMedia, setFavorites, deleteMedia, recoverMedia } from '../services/mediaService'
-import {  addAlbumMedia } from '../services/albumService'
+import { useStorage } from '../context/StorageContext'
 export function useMediaList(fetchPage, { pageSize = 30 } = {}) {
   // guardamos la función de fetch en un ref para no reiniciar la carga
   // cada vez que el componente que llama al hook se re-renderiza
+  const { refresh: refreshStorage } = useStorage()
   const fetchPageRef = useRef(fetchPage)
   useEffect(() => {
     fetchPageRef.current = fetchPage
@@ -71,13 +72,17 @@ export function useMediaList(fetchPage, { pageSize = 30 } = {}) {
   }, [])
 
   const handleAddMedia = useCallback(async (files) => {
-    for (const file of files) {
-      const formData = new FormData()
-      formData.append('file', file)
-      const saved = await saveMedia(formData)
-      addItem(saved)
+    try {
+      for (const file of files) {
+        const formData = new FormData()
+        formData.append('file', file)
+        const saved = await saveMedia(formData)
+        addItem(saved)
+      }
+    } finally {
+      refreshStorage() 
     }
-  }, [addItem])
+  }, [addItem, refreshStorage])
 
   
   const handleToggleFavorite = useCallback(async (item) => {
@@ -95,21 +100,23 @@ export function useMediaList(fetchPage, { pageSize = 30 } = {}) {
     removeItem(item.id)
     try {
       await deleteMedia([item.id])
+      refreshStorage()
     } catch (err) {
       addItem(item)
       console.error(err)
     }
-  }, [removeItem, addItem])
+  }, [removeItem, addItem, refreshStorage])
 
   const handleRecover = useCallback(async (item) => {
     removeItem(item.id)
     try {
       await recoverMedia(item.id)
+      refreshStorage()
     } catch (err) {
       addItem(item)
       console.error(err)
     }
-  }, [removeItem, addItem])
+  }, [removeItem, addItem, refreshStorage])
 
 
 
