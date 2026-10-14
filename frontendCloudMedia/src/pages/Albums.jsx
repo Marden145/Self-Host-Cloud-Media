@@ -25,10 +25,10 @@ const { albums, loading, error, handleCreateAlbum, handleDeleteAlbum } = useAlbu
   }
 }
 
-  const onCreateSubmit = async (name) => {
+  const onCreateSubmit = async (values) => {
     setCreating(true)
     try {
-      await handleCreateAlbum(name)
+      await handleCreateAlbum(values)
       setModalOpen(false)
     } catch (err) {
       console.error(err)

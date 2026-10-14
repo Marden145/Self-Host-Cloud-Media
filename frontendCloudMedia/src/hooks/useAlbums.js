@@ -19,12 +19,13 @@ export function useAlbums() {
       .finally(() => setLoading(false))
   }, [refresh])
 
-  const handleCreateAlbum = useCallback(async (name) => {
-    const created = await addAlbum(name)
-    setAlbums((prev) =>
-      prev.some((a) => a.idAlbum === created.idAlbum) ? prev : [created, ...prev],
-    )
-  }, [])
+  const handleCreateAlbum = useCallback(async ({ name, cover }) => {
+  const created = await addAlbum({ name, coverMediaId: cover?.id ?? null })
+  const album = { ...created, coverAlbumUrl: cover?.storagePath ?? null }
+  setAlbums((prev) =>
+    prev.some((a) => a.idAlbum === album.idAlbum) ? prev : [album, ...prev],
+  )
+}, [])
 
   const handleDeleteAlbum = useCallback(async (idAlbum) => {
     setAlbums((prev) => prev.filter((a) => a.idAlbum !== idAlbum)) // optimista

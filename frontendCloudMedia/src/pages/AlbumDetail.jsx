@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
-import { ChevronLeft,ImagePlus,Trash2  } from 'lucide-react'
+import { ChevronLeft,ImagePlus,Trash2,SquarePen  } from 'lucide-react'
 import { Sidebar } from '../components/Media/Sidebar'
 import { TopBar } from '../components/Media/TopBar'
 import { MediaGrid } from '../components/Media/MediaGrid'
@@ -9,16 +9,23 @@ import { Lightbox } from '../components/Media/Lightbox'
 import { useMediaList } from '../hooks/useMediaList'
 import { getAlbumMedia,deleteAlbum,addAlbumMedia,deleteAlbumMedia  } from '../services/albumService'
 import { MediaPickerModal } from '../components/Media/MediaPickerModal'
+import { useInfiniteScroll } from '../hooks/useInfiniteScroll'
+import { Modal } from '../components/Modal'
+import { AlbumForm } from '../components/Album/AlbumForm'
 function AlbumDetailInner({ idAlbum }) {
   const navigate = useNavigate()
 
   const {
     items, meta, loading, loadingMore, error, hasMorePages, loadMore, handleToggleFavorite,addItem,removeItem
   } = useMediaList((page, pageSize) => getAlbumMedia( idAlbum,page, pageSize))
-
+const sentinelRef = useInfiniteScroll(loadMore, {
+    enabled: hasMorePages && !loading && !error,
+  })
   const [openIndex, setOpenIndex] = useState(-1)
   const [pickerOpen, setPickerOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [modalEditOpen, setModalEditOpen] = useState(false)
+  const [editing, setEditing] = useState(false)
 
 const handleDeleteAlbumClick = async () => {
   setDeleting(true)
@@ -73,6 +80,14 @@ const handleAddAlbumMedia = async (selectedItems) => {
               </button>
               <button
                 type="button"
+                onClick={() => setModalEditOpen(true)}
+                className="inline-flex h-10 items-center gap-2 rounded-full bg-foreground px-4 text-sm font-medium text-background transition-opacity hover:opacity-90"
+              >
+                <SquarePen size={18} />
+                <span className="hidden sm:inline">Editar álbum</span>
+              </button>
+              <button
+                type="button"
                 onClick={handleDeleteAlbumClick}
                 disabled={deleting}
                 aria-label="Eliminar álbum"
@@ -86,13 +101,16 @@ const handleAddAlbumMedia = async (selectedItems) => {
           {loading && <p className="px-4 text-sm text-muted-foreground lg:px-8">Cargando...</p>}
           {error && <p className="px-4 text-sm text-red-500 lg:px-8">{error}</p>}
           {!loading && !error && (
-            <MediaGrid
-              items={items}
-              onOpen={(id) => setOpenIndex(items.findIndex((i) => i.id === id))}
-              onToggleFavorite={handleToggleFavorite}
-              onDelete={handleRemoveFromAlbum}
-              emptyMessage="Este álbum no tiene fotos todavía"
-            />
+            <>
+              <MediaGrid
+                items={items}
+                onOpen={(id) => setOpenIndex(items.findIndex((i) => i.id === id))}
+                onToggleFavorite={handleToggleFavorite}
+                onDelete={handleRemoveFromAlbum}
+                emptyMessage="Este álbum no tiene fotos todavía"
+              />
+              <div ref={sentinelRef} aria-hidden="true" className="h-px" />
+            </>
           )}
           {loadingMore && <p className="text-center text-sm text-muted-foreground">Cargando más...</p>}
         </main>
@@ -119,6 +137,9 @@ const handleAddAlbumMedia = async (selectedItems) => {
         onConfirm={handleAddAlbumMedia}
         excludeIds={items.map((i) => i.id)}
       />
+      <Modal open={modalEditOpen} onClose={() => setModalEditOpen(false)} title="Editar álbum">
+        <AlbumForm onSubmit={handleDeleteAlbumClick} onCancel={() => setModalEditOpen(false)} submitting={editing} initialCover={meta.coverMedia} />
+      </Modal>
     </div>
   )
 }

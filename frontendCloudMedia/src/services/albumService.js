@@ -10,8 +10,8 @@ export async function getAlbumMedia(idAlbum, pageIndex = 1, pageSize = 30) {
   return response.data
 }
 
-export async function addAlbum(name) {
-  const response = await api.post('/Album/AddAlbum', { Name: name })
+export async function addAlbum({ name, coverMediaId }) {
+  const response = await api.post('/Album/AddAlbum', { Name: name, CoverMediaId: coverMediaId })
   return response.data
 }
 export async function deleteAlbum(idAlbum) {

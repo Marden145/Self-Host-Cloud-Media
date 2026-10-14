@@ -22,12 +22,12 @@ export function useMediaList(fetchPage, { pageSize = 30 } = {}) {
 
   const loadPage = useCallback(async (page) => {
     const raw = await fetchPageRef.current(page, pageSize)
-    console.log(raw)
     const paged = raw.media ?? raw // soporta respuesta "plana" o "envuelta" (como la de álbumes)
 
     if (raw.media) {
       const { media, ...rest } = raw
       setMeta(rest) // guarda name, idAlbum, createdAt, etc. — lo que venga aparte de "media"
+      console.log('Meta:', rest)
     }
 
     setItems((prev) => {

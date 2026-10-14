@@ -6,13 +6,15 @@ import { MediaGrid } from '../components/Media/MediaGrid'
 import { Lightbox } from '../components/Media/Lightbox'
 import { useMediaList } from '../hooks/useMediaList'
 import { getTrash } from '../services/mediaService'
-
+import { useInfiniteScroll } from '../hooks/useInfiniteScroll'
 function Trash() {
   const {
     items, loading, loadingMore, error, hasMorePages, loadMore,
     handleAddMedia, handleRecover,
   } = useMediaList(getTrash)
-
+const sentinelRef = useInfiniteScroll(loadMore, {
+    enabled: hasMorePages && !loading && !error,
+  })
   const [openIndex, setOpenIndex] = useState(-1)
 
   return (
@@ -30,12 +32,15 @@ function Trash() {
           {loading && <p className="px-4 text-sm text-muted-foreground lg:px-8">Cargando...</p>}
           {error && <p className="px-4 text-sm text-red-500 lg:px-8">{error}</p>}
           {!loading && !error && (
-            <MediaGrid
-              items={items}
-              onOpen={(id) => setOpenIndex(items.findIndex((i) => i.id === id))}
-              onRecover={handleRecover}
-              emptyMessage="La papelera está vacía"
-            />
+            <>
+              <MediaGrid
+                items={items}
+                onOpen={(id) => setOpenIndex(items.findIndex((i) => i.id === id))}
+                onRecover={handleRecover}
+                emptyMessage="La papelera está vacía"
+              />
+              <div ref={sentinelRef} aria-hidden="true" className="h-px" />
+            </>
           )}
           {loadingMore && <p className="text-center text-sm text-muted-foreground">Cargando más...</p>}
         </main>

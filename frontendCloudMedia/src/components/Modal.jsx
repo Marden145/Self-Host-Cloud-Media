@@ -1,7 +1,9 @@
+import { useEffect, useId, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { X } from 'lucide-react'
 import { cn } from '../utils/utils'
-import {  useEffect } from 'react'
+
 const SIZES = {
   sm: 'max-w-sm',
   md: 'max-w-lg',
@@ -9,21 +11,34 @@ const SIZES = {
   xl: 'max-w-5xl h-[88dvh]',
 }
 
+// Pila de modales abiertos: el último es el que está encima.
+const openModals = []
+
 export function Modal({ open, onClose, title, children, size = 'sm', closeOnOverlay = true }) {
+  const id = useId()
+  const onCloseRef = useRef(onClose)
+  useEffect(() => {
+    onCloseRef.current = onClose
+  })
+
   useEffect(() => {
     if (!open) return
+    openModals.push(id)
+    document.body.style.overflow = 'hidden'
+
     const onKey = (e) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape' && openModals.at(-1) === id) onCloseRef.current()
     }
     window.addEventListener('keydown', onKey)
-    document.body.style.overflow = 'hidden'
+
     return () => {
       window.removeEventListener('keydown', onKey)
-      document.body.style.overflow = ''
+      openModals.splice(openModals.indexOf(id), 1)
+      if (openModals.length === 0) document.body.style.overflow = ''
     }
-  }, [open, onClose])
+  }, [open, id])
 
-  return (
+  return createPortal(
     <AnimatePresence>
       {open && (
         <motion.div
@@ -60,6 +75,7 @@ export function Modal({ open, onClose, title, children, size = 'sm', closeOnOver
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   )
 }

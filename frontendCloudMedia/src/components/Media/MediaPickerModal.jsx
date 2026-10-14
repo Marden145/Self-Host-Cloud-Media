@@ -6,15 +6,18 @@ import { getMedia } from '../../services/mediaService'
 import { cn } from '../../utils/utils'
 import { MediaThumb } from './MediaThumb'
 
-function PickerBody({ onClose, onConfirm, excludeIds }) {
+const acceptAll = () => true
+
+function PickerBody({ onClose, onConfirm, excludeIds, multiple, filterItem, confirmLabel }) {
   const { items, loading, loadingMore, hasMorePages, loadMore } = useMediaList(getMedia, { pageSize: 48 })
   const [selected, setSelected] = useState(new Set())
   const [submitting, setSubmitting] = useState(false)
 
-  const available = items.filter((i) => !excludeIds.includes(i.id))
+  const available = items.filter((i) => !excludeIds.includes(i.id) && filterItem(i))
 
   const toggle = (id) => {
     setSelected((prev) => {
+      if (!multiple) return prev.has(id) ? new Set() : new Set([id])
       const next = new Set(prev)
       next.has(id) ? next.delete(id) : next.add(id)
       return next
@@ -22,21 +25,25 @@ function PickerBody({ onClose, onConfirm, excludeIds }) {
   }
 
   const handleConfirm = async () => {
-  setSubmitting(true)
-  try {
-    const chosen = available.filter((i) => selected.has(i.id))
-    await onConfirm(chosen)
-    onClose()
-  } catch (err) {
-    console.error(err)
-    setSubmitting(false)
+    setSubmitting(true)
+    try {
+      const chosen = available.filter((i) => selected.has(i.id))
+      await onConfirm(chosen)
+      onClose()
+    } catch (err) {
+      console.error(err)
+      setSubmitting(false)
+    }
   }
-}
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4">
       <div className="min-h-0 flex-1 overflow-y-auto">
         {loading && <p className="py-10 text-center text-sm text-muted-foreground">Cargando...</p>}
+
+        {!loading && available.length === 0 && !hasMorePages && (
+          <p className="py-10 text-center text-sm text-muted-foreground">No hay archivos disponibles</p>
+        )}
 
         <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
           {available.map((item) => {
@@ -76,7 +83,13 @@ function PickerBody({ onClose, onConfirm, excludeIds }) {
       </div>
 
       <div className="flex shrink-0 items-center justify-between border-t border-border pt-4">
-        <p className="text-sm text-muted-foreground">{selected.size} seleccionados</p>
+        <p className="text-sm text-muted-foreground">
+          {multiple
+            ? `${selected.size} seleccionados`
+            : selected.size
+              ? 'Imagen seleccionada'
+              : 'Elige una imagen'}
+        </p>
         <div className="flex gap-2">
           <button
             type="button"
@@ -91,7 +104,7 @@ function PickerBody({ onClose, onConfirm, excludeIds }) {
             disabled={selected.size === 0 || submitting}
             className="h-10 rounded-full bg-highlight px-4 text-sm font-medium text-highlight-foreground disabled:opacity-50"
           >
-            {submitting ? 'Agregando...' : 'Agregar'}
+            {submitting ? 'Agregando...' : confirmLabel}
           </button>
         </div>
       </div>
@@ -99,10 +112,26 @@ function PickerBody({ onClose, onConfirm, excludeIds }) {
   )
 }
 
-export function MediaPickerModal({ open, onClose, onConfirm, excludeIds = [] }) {
+export function MediaPickerModal({
+  open,
+  onClose,
+  onConfirm,
+  excludeIds = [],
+  multiple = true,
+  filterItem = acceptAll,
+  title = 'Agregar al álbum',
+  confirmLabel = 'Agregar',
+}) {
   return (
-    <Modal open={open} onClose={onClose} title="Agregar al álbum" size="xl">
-      <PickerBody onClose={onClose} onConfirm={onConfirm} excludeIds={excludeIds} />
+    <Modal open={open} onClose={onClose} title={title} size="xl">
+      <PickerBody
+        onClose={onClose}
+        onConfirm={onConfirm}
+        excludeIds={excludeIds}
+        multiple={multiple}
+        filterItem={filterItem}
+        confirmLabel={confirmLabel}
+      />
     </Modal>
   )
 }

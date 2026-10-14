@@ -5,14 +5,16 @@ import { TopBar } from '../components/Media/TopBar'
 import { MediaGrid } from '../components/Media/MediaGrid'
 import { Lightbox } from '../components/Media/Lightbox'
 import { useMediaList } from '../hooks/useMediaList'
-import { getFavorites, saveMedia, setFavorites } from '../services/mediaService'
-
+import { getFavorites, setFavorites } from '../services/mediaService'
+import { useInfiniteScroll } from '../hooks/useInfiniteScroll'
 function Favorites() {
   const {
     items, loading, loadingMore, error, hasMorePages, loadMore,
     handleAddMedia, addItem, removeItem,handleDelete
   } = useMediaList(getFavorites)
-
+const sentinelRef = useInfiniteScroll(loadMore, {
+    enabled: hasMorePages && !loading && !error,
+  })
   const [openIndex, setOpenIndex] = useState(-1)
 
   const handleUnfavorite = async (item) => {
@@ -35,13 +37,15 @@ function Favorites() {
           {loading && <p className="px-4 text-sm text-muted-foreground lg:px-8">Cargando...</p>}
           {error && <p className="px-4 text-sm text-red-500 lg:px-8">{error}</p>}
           {!loading && !error && (
-            <MediaGrid
-              items={items}
-              onOpen={(id) => setOpenIndex(items.findIndex((i) => i.id === id))}
-              onToggleFavorite={handleUnfavorite}
-              emptyMessage="Aún no tienes favoritos"
-              onDelete={handleDelete}
-            />
+            <>
+              <MediaGrid
+                items={items}
+                onOpen={(id) => setOpenIndex(items.findIndex((i) => i.id === id))}
+                onToggleFavorite={handleUnfavorite}
+                onDelete={handleDelete}
+              />
+              <div ref={sentinelRef} aria-hidden="true" className="h-px" />
+            </>
           )}
           {loadingMore && <p className="text-center text-sm text-muted-foreground">Cargando más...</p>}
         </main>

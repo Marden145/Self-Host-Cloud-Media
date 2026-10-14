@@ -6,12 +6,15 @@ import { MediaGrid } from '../components/Media/MediaGrid'
 import { Lightbox } from '../components/Media/Lightbox'
 import { useMediaList } from '../hooks/useMediaList'
 import { getMedia } from '../services/mediaService'
-
+import { useInfiniteScroll } from '../hooks/useInfiniteScroll'
 function Gallery() {
   const {
     items, loading, loadingMore, error, hasMorePages, loadMore,
     handleAddMedia, handleToggleFavorite, handleDelete,
   } = useMediaList(getMedia)
+const sentinelRef = useInfiniteScroll(loadMore, {
+    enabled: hasMorePages && !loading && !error,
+  })
 
   const [openIndex, setOpenIndex] = useState(-1)
 
@@ -24,12 +27,15 @@ function Gallery() {
           {loading && <p className="px-4 text-sm text-muted-foreground lg:px-8">Cargando...</p>}
           {error && <p className="px-4 text-sm text-red-500 lg:px-8">{error}</p>}
           {!loading && !error && (
-            <MediaGrid
-              items={items}
-              onOpen={(id) => setOpenIndex(items.findIndex((i) => i.id === id))}
-              onToggleFavorite={handleToggleFavorite}
-              onDelete={handleDelete}
-            />
+            <>
+              <MediaGrid
+                items={items}
+                onOpen={(id) => setOpenIndex(items.findIndex((i) => i.id === id))}
+                onToggleFavorite={handleToggleFavorite}
+                onDelete={handleDelete}
+              />
+              <div ref={sentinelRef} aria-hidden="true" className="h-px" />
+            </>
           )}
           {loadingMore && <p className="text-center text-sm text-muted-foreground">Cargando más...</p>}
         </main>

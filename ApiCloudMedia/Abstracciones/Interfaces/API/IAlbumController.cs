@@ -11,6 +11,7 @@ namespace Abstracciones.Interfaces.API
     public interface IAlbumController
     {
         Task<IActionResult> AddAlbum(AlbumRequest albumRequest);
+        Task<IActionResult> EditAlbum(AlbumEditRequest albumEditRequest);
         Task<IActionResult> AddAlbumMedia(AlbumMediaRequest albumMediaRequest);
         Task<IActionResult> DeleteAlbum(Guid idAlbum);
         Task<IActionResult> DeleteAlbumMedia(Guid idAlbum, List<Guid> idMedias);

@@ -1,6 +1,8 @@
 ﻿using Abstracciones.Entities;
 using Abstracciones.Interfaces.Repository;
 using Abstracciones.Models;
+using Abstracciones.Models.Request;
+using Abstracciones.Models.Response;
 using Microsoft.EntityFrameworkCore;
 using Repository.Context;
 using Repository.Utils;
@@ -61,15 +63,28 @@ namespace Repository
                 throw new InvalidOperationException("The specified album media does not exist.");
         }
 
-        public async Task<IEnumerable<AlbumEntity>> GetAlbums(Guid idUser) => await _context.Album
-                .Where(a => a.State == 1 && a.IdUser == idUser)
-                .ToListAsync();
+        public async Task<IEnumerable<AlbumResponse>> GetAlbums(Guid idUser)
+             => await _context.Album
+        .Where(a => a.State == 1 && a.IdUser == idUser)
+        .Select(a => new AlbumResponse
+        {
+            idAlbum = a.idAlbum,
+            Name = a.Name,
+            State = a.State,
+            coverAlbumUrl = _context.Media
+                .Where(m => m.Id == a.CoverMediaId && m.state == 1)
+                .Select(m => m.StoragePath)
+                .FirstOrDefault()
+        })
+        .ToListAsync();
 
         public async Task<AlbumMediaResponse?> GetAlbumMedia(Guid idAlbum, int pageIndex, int pageSize)
         {
             var albumInfo = await GetAlbumInfoAsync(idAlbum);
             if (albumInfo is null) return null;
             albumInfo.Media = await GetAlbumMediaPagedAsync(idAlbum, pageIndex, pageSize);
+            albumInfo.coverMedia = await GetCoverMedia(idAlbum);
+
             return albumInfo;
         }
         private async Task<AlbumMediaResponse?> GetAlbumInfoAsync(Guid idAlbum) => await _context.Album
@@ -83,6 +98,24 @@ namespace Repository
                     State = a.State
                 })
                 .FirstOrDefaultAsync();
+        private async Task<MediaResponse?> GetCoverMedia(Guid idAlbum) => await _context.Album
+    .Where(a => a.idAlbum == idAlbum && a.State == 1)
+    .Join(
+        _context.Media,
+        album => album.CoverMediaId,
+        media => media.Id,
+        (album, media) => media
+    )
+    .Select(m => new MediaResponse
+    {
+        Id = m.Id,
+        StoragePath = m.StoragePath,
+        OriginalFileName = m.OriginalFileName,
+        ContentType = m.ContentType,
+        IsFavorite = m.IsFavorite,
+
+    })
+    .FirstOrDefaultAsync();
         private async Task<Pagination<MediaResponse>> GetAlbumMediaPagedAsync(Guid idAlbum, int pageIndex, int pageSize) => await _context.AlbumMedia
                 .Where(am => am.idAlbum == idAlbum && am.State == 1 && am.Media.state == 1)
                 .OrderByDescending(am => am.Media.UploadedAt)
@@ -102,5 +135,10 @@ namespace Repository
                     state = am.Media.state,
                     IsFavorite = am.Media.IsFavorite
                 }).ToPaginacionAsync(pageIndex, pageSize);
+
+        public async Task EditAlbum(AlbumEditRequest albumEditRequest) => await _context.Album.Where(a => a.idAlbum == albumEditRequest.idAlbum && a.State == 1)
+             .ExecuteUpdateAsync(setters => setters
+            .SetProperty(am => am.Name, albumEditRequest.Name)
+            .SetProperty(am => am.CoverMediaId, albumEditRequest.CoverMediaId));
     }
 }

@@ -3,6 +3,7 @@ using Abstracciones.Interfaces.API;
 using Abstracciones.Interfaces.Services;
 using Abstracciones.Models;
 using Abstracciones.Models.Request;
+using Abstracciones.Models.Response;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -50,6 +51,15 @@ namespace API.Controllers
                 return BadRequest("Invalid album or media id");
             return Ok(await _albumServices.DeleteAlbumMedia(idAlbum, idMedias));
         }
+        [HttpPut("EditAlbum")]
+        public async Task<IActionResult> EditAlbum (AlbumEditRequest albumEditRequest)
+        {
+            if(albumEditRequest == null || albumEditRequest.idAlbum == Guid.Empty)
+                return BadRequest("Invalid album edit request");
+            await _albumServices.EditAlbum(albumEditRequest);
+            return Ok();
+        }
+
         [HttpGet("GetAlbumMedia/{idAlbum}/{pageIndex}/{pageSize}")]
         public async Task<IActionResult> GetAlbumMedia(Guid idAlbum, int pageIndex, int pageSize)
         {
@@ -64,7 +74,7 @@ namespace API.Controllers
         [HttpGet("GetAlbums")]
         public async Task<IActionResult> GetAlbums() 
         {
-            IEnumerable<AlbumEntity> albumEntity = await _albumServices.GetAlbums(CurrentUserId);
+            IEnumerable<AlbumResponse> albumEntity = await _albumServices.GetAlbums(CurrentUserId);
             if(!albumEntity.Any())
                 return NotFound("No albums found");
             return Ok(albumEntity);

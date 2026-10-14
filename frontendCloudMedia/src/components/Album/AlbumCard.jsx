@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { Images,Trash2  } from 'lucide-react'
 import { Link } from 'react-router-dom'
-
+import { getMediaUrl } from '../../utils/getMediaUrl'
 export function AlbumCard({ album, index = 0, onDelete }) {
   return (
     <motion.div
@@ -12,9 +12,20 @@ export function AlbumCard({ album, index = 0, onDelete }) {
     >
       <Link to={`/albumes/${album.idAlbum}`} className="block">
         <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-muted ring-1 ring-border transition-shadow group-hover:shadow-md">
-          <div className="flex h-full w-full items-center justify-center">
-            <Images className="size-9 text-muted-foreground/40" aria-hidden="true" />
-          </div>
+          <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-muted ring-1 ring-border transition-shadow group-hover:shadow-md">
+  {album.coverAlbumUrl ? (
+    <img
+      src={getMediaUrl(album.coverAlbumUrl)}
+      alt=""
+      loading="lazy"
+      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+    />
+  ) : (
+    <div className="flex h-full w-full items-center justify-center">
+      <Images className="size-9 text-muted-foreground/40" aria-hidden="true" />
+    </div>
+  )}
+</div>
         </div>
         <p className="mt-2 truncate text-sm font-medium">{album.name}</p>
       </Link>

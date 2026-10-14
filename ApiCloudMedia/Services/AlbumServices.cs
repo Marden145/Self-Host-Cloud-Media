@@ -3,6 +3,7 @@ using Abstracciones.Interfaces.Repository;
 using Abstracciones.Interfaces.Services;
 using Abstracciones.Models;
 using Abstracciones.Models.Request;
+using Abstracciones.Models.Response;
 using Azure.Core;
 using Repository;
 using System;
@@ -60,8 +61,15 @@ namespace Services
             return idAlbum;
         }
 
+        public async Task EditAlbum(AlbumEditRequest albumEditRequest)
+        {
+            if (albumEditRequest == null)
+                throw new ArgumentNullException(nameof(albumEditRequest), "Album edit request cannot be null.");
+            await _albumRepository.EditAlbum(albumEditRequest);
+        }
+
         public async Task<AlbumMediaResponse?> GetAlbumMedia(Guid idAlbum, int pageIndex, int pageSize) => await _albumRepository.GetAlbumMedia(idAlbum, pageIndex, pageSize);
-        public async Task<IEnumerable<AlbumEntity>> GetAlbums(Guid idUser) => await _albumRepository.GetAlbums(idUser);
+        public async Task<IEnumerable<AlbumResponse>> GetAlbums(Guid idUser) => await _albumRepository.GetAlbums(idUser);
 
         private async Task<List<Guid>> ValidateDataAlbumMedia(AlbumMediaRequest albumMediaRequest) 
         {
