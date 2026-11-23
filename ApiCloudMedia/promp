@@ -1,0 +1,80 @@
+Quiero iniciar la implementación completa del requerimiento **REQ-001: Registro público y autenticación de usuarios locales**.
+
+Utiliza como referencia obligatoria los siguientes documentos:
+
+- `SDD/CONSTITUTION.md`
+- `SDD/requirements/REQ-001/specification.md`
+- `SDD/requirements/REQ-001/plan.md`
+- `SDD/requirements/REQ-001/tasks.md`
+
+### Instrucciones de ejecución
+
+**1. Análisis inicial**
+
+Lee y comprende todos los documentos del requerimiento y la Constitución del proyecto.
+
+Verifica que los documentos sean consistentes entre sí y que no existan contradicciones o decisiones técnicas pendientes.
+
+**2. Análisis arquitectónico**
+
+Realiza el análisis de la arquitectura actual del proyecto utilizando las capacidades de análisis disponibles.
+
+El resultado debe quedar documentado en:
+
+`SDD/requirements/REQ-001/architecture-analysis.md`
+
+El análisis debe identificar:
+
+- Componentes existentes que serán modificados.
+- Clases, interfaces, servicios y repositorios involucrados.
+- Flujos actuales de autenticación y persistencia.
+- Dependencias entre componentes.
+- Cambios necesarios en la base de datos.
+- Riesgos de regresión.
+- Consideraciones de seguridad.
+- Recomendaciones técnicas para implementar el requerimiento respetando la arquitectura actual.
+
+**3. Revisión y planificación**
+
+Una vez finalizado el análisis arquitectónico, revisa los resultados junto con el plan y las tareas.
+
+Verifica que la estrategia de implementación sea viable y que respete todas las reglas de `CONSTITUTION.md`.
+
+Si encuentras diferencias entre la documentación y el código existente, no asumas que la documentación es correcta. Identifica las diferencias y presenta las recomendaciones correspondientes.
+
+**4. Implementación**
+
+Cuando el análisis y la planificación estén completos, presenta un resumen de los cambios que se realizarán y solicita mi aprobación explícita antes de modificar código.
+
+Después de recibir mi aprobación, coordina la implementación completa del requerimiento, respetando las responsabilidades, herramientas y restricciones definidas para cada componente del equipo.
+
+Las tareas deben ejecutarse respetando sus dependencias. No ejecutes indiscriminadamente todas las tareas en paralelo.
+
+**5. Validación y revisión**
+
+Una vez implementada la funcionalidad:
+
+- Verifica que las pruebas correspondientes se ejecuten correctamente.
+- Comprueba que se cumplan todos los criterios de aceptación.
+- Verifica que no existan regresiones en la autenticación mediante Google.
+- Comprueba el cumplimiento de la Constitución.
+- Realiza una revisión independiente de los cambios.
+- Corrige los problemas encontrados y vuelve a validar cuando corresponda.
+
+**6. Documentación**
+
+Asegúrate de que la documentación específica del requerimiento y la documentación general del proyecto queden actualizadas de acuerdo con los cambios realmente implementados.
+
+### Reglas importantes
+
+- No inventes componentes, métodos ni convenciones que no existan en el proyecto.
+- No introduzcas una nueva capa arquitectónica.
+- No realices refactorizaciones ajenas al requerimiento.
+- No modifiques archivos fuera del alcance aprobado.
+- No ignores conflictos entre la arquitectura existente y los documentos SDD.
+- No expongas secretos ni información sensible.
+- No declares terminado el requerimiento sin evidencias de pruebas y validación.
+
+**Importante:** Quiero supervisar el proceso. Solicita mi aprobación antes de comenzar las modificaciones de código y antes de declarar REQ-001 como completado.
+
+Por ahora, inicia con el análisis de los documentos y la arquitectura. No modifiques código hasta recibir mi aprobación.
