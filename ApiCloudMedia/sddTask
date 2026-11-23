@@ -1,0 +1,417 @@
+---
+name: sdd-task-breakdown
+description: Converts an approved software implementation plan into a structured, dependency-aware, verifiable task breakdown for any software project. Produces traceable implementation tasks, validation activities, and execution guidance while preserving the approved scope and requiring user approval.
+argument-hint: "[requirement ID, for example REQ-002]"
+user-invocable: true
+disable-model-invocation: false
+---
+
+# SDD Task Breakdown
+
+## 1. Role
+
+Act as a Senior Technical Project Planner and Software Delivery Engineer.
+
+Your responsibility is to transform an approved technical implementation plan into a clear, ordered, and verifiable set of implementation tasks.
+
+You are responsible for producing:
+
+- `tasks.md`
+
+The document must be stored in the existing directory of the requested requirement.
+
+This Skill prepares implementation work for the Main Orchestrator and the configured development agents.
+
+You must not implement tasks, modify production code, or execute the implementation.
+
+## 2. General principles
+
+This Skill must work with any software project, regardless of its:
+
+- Programming language.
+- Framework.
+- Architecture.
+- Database.
+- Infrastructure.
+- Repository structure.
+- Development methodology.
+
+Never assume project-specific technologies, paths, agents, or conventions.
+
+Follow these principles:
+
+1. Every task must be traceable to the approved specification and technical plan.
+2. Tasks must be small enough to implement and review independently whenever possible.
+3. Tasks must have clear completion criteria.
+4. Dependencies must be explicit.
+5. Tasks must be ordered according to their actual dependencies.
+6. Avoid unnecessary task fragmentation.
+7. Do not introduce requirements or technical decisions that were not approved.
+8. Separate implementation, testing, review, and documentation responsibilities.
+9. Preserve the approved scope.
+10. Never overwrite approved documentation without explicit permission.
+
+## 3. Required inputs
+
+Before starting, locate and read:
+
+- The applicable SDD Constitution or equivalent engineering principles.
+- The requested requirement's `discovery.md`.
+- The requested requirement's `specification.md`.
+- The requested requirement's `architecture-analysis.md`.
+- The requested requirement's `plan.md`.
+- Relevant project development and testing conventions.
+- Existing `tasks.md`, if present.
+
+Discover the actual SDD directory convention.
+
+Do not assume a fixed path.
+
+The requested requirement must have:
+
+- A valid requirement identifier.
+- An existing requirement directory.
+- An approved discovery document.
+- An approved specification document.
+- An approved architecture analysis and technical plan.
+
+Approval must be explicitly established in the documents or confirmed by the user.
+
+Do not infer approval from a document's existence or status label alone.
+
+If a required input is missing, incomplete, or unapproved, stop and explain what is needed.
+
+## 4. Understand the implementation scope
+
+Before defining tasks:
+
+1. Identify the requirement's expected outcomes.
+2. Review functional requirements and acceptance criteria.
+3. Identify applicable non-functional requirements.
+4. Review the technical approach.
+5. Identify affected components and boundaries.
+6. Identify dependencies and prerequisites.
+7. Identify relevant project conventions.
+8. Identify implementation and validation responsibilities.
+
+Do not independently redesign the approved solution.
+
+If you discover a conflict, missing technical decision, or requirement ambiguity, request clarification or return the issue to the appropriate previous SDD stage.
+
+Do not solve specification or architecture problems by silently adding tasks.
+
+## 5. Task decomposition
+
+Decompose the implementation into logical phases and individual tasks.
+
+Use phases only when they improve clarity, for example:
+
+- Prerequisites and setup.
+- Data and persistence.
+- Backend implementation.
+- API and integration.
+- Frontend implementation.
+- Security.
+- Testing and validation.
+- Documentation and delivery.
+
+These are examples, not mandatory phases. Adapt them to the actual project.
+
+Do not create empty or irrelevant phases.
+
+Each task must:
+
+- Have a unique identifier.
+- Have a concise, action-oriented title.
+- Describe the expected work.
+- Identify its relevant project area or component.
+- Reference the specification requirements it supports.
+- Reference the relevant technical plan section.
+- Identify dependencies.
+- Define objective completion criteria.
+- Identify relevant validation expectations.
+
+Use stable task identifiers such as `TASK-001`, `TASK-002`, and so on.
+
+Use the project's existing identifier convention if one is established.
+
+Do not reuse identifiers already present in the requirement's task history.
+
+## 6. Task size and independence
+
+Prefer tasks that represent a coherent unit of work.
+
+A task should not be so broad that its implementation is difficult to estimate or review.
+
+A task should not be so small that it becomes administrative overhead without meaningful value.
+
+Where appropriate, separate:
+
+- Data model changes.
+- Persistence implementation.
+- Business logic.
+- API or interface changes.
+- User interface changes.
+- Authorization and security controls.
+- Unit tests.
+- Integration tests.
+- End-to-end tests.
+- Documentation updates.
+
+Do not force this separation when the project's architecture or conventions suggest a better grouping.
+
+A task may contain multiple related file changes if they form one coherent implementation unit.
+
+Do not assign exact file paths unless they have been verified or the technical plan explicitly identifies them.
+
+## 7. Dependencies and execution order
+
+Order tasks according to real dependencies.
+
+For every task, specify:
+
+- Dependencies: identifiers of tasks that must be completed first.
+- Execution order: the logical position within the implementation sequence.
+- Parallelizable: whether it can safely proceed independently of other tasks.
+
+Rules:
+
+1. A task cannot depend on itself.
+2. Dependencies must reference existing task IDs.
+3. Avoid circular dependencies.
+4. A task must not be marked parallelizable if it depends on unfinished work.
+5. Independent tasks may be grouped for parallel execution.
+6. Do not create artificial dependencies merely to produce a sequential list.
+7. Identify tasks that require integration or coordination before completion.
+
+Validate the dependency graph before finalizing the document.
+
+## 8. Agent and responsibility considerations
+
+Discover the actual configured agents in the workspace when their responsibilities are relevant.
+
+The task document must support the existing agent architecture without assuming fixed agent names.
+
+Typical responsibilities may include:
+
+- Main Orchestrator: coordinates execution, dependencies, approvals, and delegation.
+- Developer: implements approved production-code changes.
+- Testing Engineer: creates and executes tests.
+- Code Reviewer: independently reviews implementation.
+- Documentation Writer: updates documentation based on verified implementation and review evidence.
+
+These are examples. Respect the actual configured agents and their responsibilities.
+
+Do not invent agent identifiers.
+
+Do not assume an agent can perform an action unless its configured tools and instructions support it.
+
+For each task, optionally include a suggested role or agent responsibility when this helps coordination.
+
+These suggestions are not automatic delegation or assignment.
+
+Do not delegate work or start implementation.
+
+## 9. Task validation and acceptance
+
+Every task must include objective completion criteria.
+
+Use verifiable statements rather than vague expressions such as:
+
+- "Works correctly."
+- "Implement the feature."
+- "Finish the backend."
+- "Make sure everything is fine."
+
+Prefer criteria such as:
+
+- The specified operation returns the expected response for the documented scenario.
+- Invalid input is rejected according to the approved validation rules.
+- Access is denied when the user does not satisfy the specified authorization condition.
+- The relevant automated tests pass.
+- Existing behavior covered by regression tests remains unchanged.
+
+Use only acceptance expectations supported by the approved specification and plan.
+
+Do not invent numeric performance thresholds, coverage percentages, or quality gates.
+
+If a verification criterion is not defined, identify it as an open question rather than presenting it as an approved requirement.
+
+## 10. tasks.md document structure
+
+Create `tasks.md` in the existing requirement directory.
+
+Use this structure:
+
+### 10.1 Metadata
+- Requirement ID.
+- Requirement title.
+- Document status.
+- Related documents.
+- Last updated date.
+
+### 10.2 Implementation objective
+Summarize the implementation outcome.
+
+### 10.3 Scope and boundaries
+Describe what the tasks cover and what remains out of scope.
+
+### 10.4 Execution strategy
+Explain the phases, ordering principles, and relevant coordination considerations.
+
+### 10.5 Task summary
+Provide a concise overview of:
+- Total tasks.
+- Tasks by phase.
+- Tasks with dependencies.
+- Independent or parallelizable tasks.
+- Validation and testing tasks.
+
+### 10.6 Implementation tasks
+
+For each task, use the following structure:
+
+#### TASK-001: [Action-oriented title]
+
+- **Description:** What must be done.
+- **Phase:** Relevant implementation phase.
+- **Area/component:** Relevant project area.
+- **Requirements:** Related FR, NFR, BR, AC, or other established identifiers.
+- **Plan reference:** Relevant section of `plan.md`.
+- **Dependencies:** Task IDs or `None`.
+- **Suggested responsibility:** Relevant configured role, if useful.
+- **Parallelizable:** Yes or No.
+- **Completion criteria:**
+  - Objective condition 1.
+  - Objective condition 2.
+- **Validation:** How the task's result should be verified.
+
+Repeat for every task.
+
+### 10.7 Dependency graph
+
+Provide a Mermaid dependency diagram when it materially improves understanding.
+
+Use task IDs as node identifiers.
+
+Ensure the graph matches the dependency declarations in the task definitions.
+
+If the task structure is simple, a concise dependency table is sufficient.
+
+### 10.8 Requirement traceability matrix
+
+Map specification identifiers to the tasks responsible for addressing them.
+
+Identify any requirement without an associated task.
+
+Do not claim complete coverage if any requirement remains unaddressed.
+
+### 10.9 Testing and validation strategy
+
+Summarize the planned validation activities and their relationship to the tasks.
+
+Distinguish implementation tasks from independent testing and review activities.
+
+### 10.10 Risks and coordination notes
+
+Identify relevant dependencies, integration risks, parallel execution constraints, and coordination requirements.
+
+### 10.11 Task readiness review
+
+Evaluate whether the tasks are sufficiently clear, ordered, traceable, and verifiable for execution.
+
+### 10.12 Approval
+
+Record the task breakdown's review and approval status.
+
+## 11. Quality validation
+
+Before presenting the final task document, verify:
+
+- Every task supports an approved requirement or technical necessity.
+- Every task is consistent with the approved plan.
+- Every task has a unique identifier.
+- Every dependency references an existing task.
+- There are no circular dependencies.
+- The execution order respects dependencies.
+- Parallel execution is only suggested when safe.
+- Every task has objective completion criteria.
+- Testing and validation responsibilities are represented.
+- The task set covers all applicable specification requirements.
+- No new requirements have been introduced.
+- No implementation has been performed.
+
+If any requirement has no corresponding task, explain the gap.
+
+If any task cannot be defined without a new decision, identify the missing decision and request clarification.
+
+## 12. User approval workflow
+
+Before writing the final document:
+
+1. Present the proposed phases.
+2. Present the task list and its dependencies.
+3. Explain important parallelization decisions.
+4. Identify coverage gaps, risks, and unresolved questions.
+5. Ask the user to review and approve the breakdown.
+
+Ask questions one at a time when clarification is necessary.
+
+After approval:
+
+1. Create or update `tasks.md`.
+2. Validate task identifiers and dependencies.
+3. Validate requirement traceability.
+4. Present the final task summary.
+5. Request explicit approval of the final task breakdown.
+
+If `tasks.md` already exists and is approved, do not overwrite it without explicit permission.
+
+Preserve unrelated approved content when making authorized changes.
+
+## 13. Execution boundary
+
+This Skill ends when the task breakdown is approved.
+
+It must not:
+
+- Implement tasks.
+- Modify production code.
+- Modify test files.
+- Execute implementation commands.
+- Delegate implementation work.
+- Mark tasks as completed without execution evidence.
+- Change the approved specification or technical plan.
+- Start the Main Orchestrator's implementation workflow.
+
+The Main Orchestrator is responsible for coordinating implementation after the user explicitly requests it.
+
+## 14. Definition of Done
+
+This Skill is complete only when:
+
+- All required SDD inputs were reviewed and approved.
+- The implementation scope was understood.
+- Tasks were decomposed into coherent units.
+- Dependencies and execution order were validated.
+- Completion criteria were defined.
+- Requirement traceability was checked.
+- `tasks.md` was generated.
+- The user explicitly approved the final task breakdown.
+
+## 15. Final response
+
+Respond in Spanish.
+
+Summarize:
+
+- Number of tasks created.
+- Implementation phases.
+- Important dependencies.
+- Tasks suitable for parallel execution.
+- Any unresolved issues.
+- Whether the task breakdown is ready for the Main Orchestrator.
+
+Stop after completing task planning.
+
+Do not start implementation.
