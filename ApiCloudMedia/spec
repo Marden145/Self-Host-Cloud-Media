@@ -1,0 +1,331 @@
+# REQ-001 — Registro y autenticación local de usuarios
+
+## 1. Información general
+
+| Campo | Valor |
+|---|---|
+| Identificador | REQ-001 |
+| Nombre | Registro y autenticación local de usuarios |
+| Estado | Draft — Pendiente de aprobación |
+| Tipo | Backend / API |
+| Prioridad | Alta |
+| Sistema | Self-Host Cloud Media |
+| Proyecto | ApiCloudMedia |
+
+## 2. Descripción del requerimiento
+
+Actualmente, la aplicación permite autenticar usuarios mediante Google. El flujo existente valida un `idToken`, busca al usuario por correo electrónico y, si no existe, crea un registro utilizando la entidad `UserEntity`. Posteriormente genera un JWT para permitir el acceso a los recursos protegidos.
+
+Se requiere incorporar un mecanismo de registro público que permita crear cuentas directamente mediante una solicitud HTTP con los datos del usuario, sin depender de Google.
+
+Adicionalmente, los usuarios registrados mediante este mecanismo deben poder autenticarse posteriormente utilizando su correo electrónico y contraseña.
+
+La solución debe reutilizar la entidad `UserEntity`, los servicios y repositorios existentes, y respetar la arquitectura actual del backend.
+
+## 3. Objetivos
+
+1. Permitir el registro público de usuarios mediante una API REST.
+2. Reutilizar la entidad `UserEntity` existente.
+3. Almacenar las contraseñas de forma segura mediante hashing.
+4. Evitar la creación de cuentas duplicadas.
+5. Permitir que los usuarios registrados se autentiquen con correo y contraseña.
+6. Generar JWT utilizando el contrato de autenticación existente.
+7. Mantener la compatibilidad con el inicio de sesión mediante Google.
+8. Mantener la separación de responsabilidades entre API, Services, Repository y Abstracciones.
+
+## 4. Alcance funcional
+
+### 4.1. Registro público
+
+Se incorporará la operación:
+
+`POST /api/users`
+
+La operación será pública y no requerirá un JWT previo.
+
+#### Datos de entrada
+
+El cliente deberá proporcionar un JSON con los siguientes campos:
+
+| Campo | Tipo | Obligatorio | Restricciones |
+|---|---|---|---|
+| `firstName` | string | Sí | No vacío. Máximo 100 caracteres. |
+| `lastName` | string | Sí | No vacío. Máximo 100 caracteres. |
+| `email` | string | Sí | Formato válido. Máximo 254 caracteres. |
+| `password` | string | Sí | Entre 12 y 128 caracteres. |
+
+Los nombres y el correo deberán validarse antes de procesar la creación.
+
+El correo deberá normalizarse de manera consistente, eliminando espacios externos y utilizando una representación canónica para las consultas y persistencia. La normalización deberá aplicarse también al flujo de autenticación de Google para evitar identidades duplicadas por diferencias de formato.
+
+#### Ejemplo de solicitud
+
+```http
+POST /api/users
+Content-Type: application/json
+```
+
+```json
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@example.com",
+  "password": "A-Strong-Password-2026"
+}
+```
+
+#### Reglas de negocio
+
+- El identificador `IdUser` deberá generarse en el backend mediante un GUID.
+- El cliente no podrá establecer el identificador del usuario.
+- El campo `Provider` deberá asignarse en el backend con el valor `Local`, siguiendo la convención actual de proveedores.
+- El campo `Photo` será opcional y permanecerá nulo durante el registro inicial.
+- El campo `Password` de `UserEntity` deberá almacenar exclusivamente el resultado del hashing seguro de la contraseña.
+- Nunca se almacenará ni registrará la contraseña original.
+- No se permitirá registrar dos cuentas con el mismo correo normalizado.
+- El registro no deberá modificar ni convertir automáticamente una cuenta existente de Google en una cuenta local.
+- No se permitirá que el cliente controle campos internos como `IdUser`, `Provider` o el hash de contraseña.
+
+#### Respuesta exitosa
+
+Se deberá responder con:
+
+`201 Created`
+
+La respuesta deberá contener una representación segura del usuario creado, sin incluir la contraseña original ni su hash.
+
+Ejemplo ilustrativo:
+
+```json
+{
+  "idUser": "2c6d3b2d-3f44-4e89-a1a7-2c6d3b2d3f44",
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@example.com"
+}
+```
+
+El contrato definitivo de respuesta deberá seguir las convenciones de los demás endpoints y utilizar un DTO de respuesta.
+
+### 4.2. Autenticación mediante correo y contraseña
+
+Se incorporará la operación:
+
+`POST /api/users/login`
+
+Será pública y no requerirá autenticación previa.
+
+#### Datos de entrada
+
+| Campo | Tipo | Obligatorio |
+|---|---|---|
+| `email` | string | Sí |
+| `password` | string | Sí |
+
+Ejemplo:
+
+```http
+POST /api/users/login
+Content-Type: application/json
+```
+
+```json
+{
+  "email": "john.doe@example.com",
+  "password": "A-Strong-Password-2026"
+}
+```
+
+#### Reglas de negocio
+
+- El sistema deberá buscar el usuario mediante el correo normalizado.
+- El usuario deberá corresponder a una cuenta que admita autenticación local.
+- La contraseña recibida deberá verificarse contra el hash almacenado utilizando el mecanismo de verificación correspondiente.
+- Nunca se compararán contraseñas mediante comparación directa de texto plano.
+- Si las credenciales son válidas, el sistema deberá generar un JWT.
+- El JWT deberá conservar el contrato de claims utilizado por el sistema actual.
+- El proceso de autenticación Google deberá continuar funcionando independientemente de esta nueva modalidad.
+
+#### Respuesta exitosa
+
+`200 OK`
+
+La respuesta deberá utilizar el modelo `Token` existente, manteniendo el contrato de autenticación actual.
+
+No se devolverán contraseñas ni hashes.
+
+#### Credenciales inválidas
+
+`401 Unauthorized`
+
+La respuesta deberá utilizar un mensaje genérico que no permita determinar si el correo existe o si la contraseña es incorrecta.
+
+### 4.3. Compatibilidad con Google
+
+La implementación deberá mantener operativo el endpoint existente:
+
+`POST /api/LoginGoogle/sing-google`
+
+Se deberán verificar los siguientes aspectos:
+
+- Las cuentas existentes de Google deberán continuar autenticándose.
+- Los usuarios nuevos creados mediante Google deberán conservar `Provider = "Google"`.
+- Las cuentas Google que no tengan contraseña no deberán tratarse como cuentas locales.
+- La normalización del correo deberá mantener una identidad consistente entre ambos mecanismos.
+- La nueva lógica no deberá sobrescribir contraseñas ni proveedores de cuentas existentes.
+
+## 5. Requisitos no funcionales
+
+### 5.1. Seguridad
+
+- Utilizar hashing de contraseñas mediante un algoritmo especializado para contraseñas, con salt y parámetros seguros.
+- Se recomienda evaluar `IPasswordHasher<UserEntity>` de ASP.NET Core, evitando implementar algoritmos criptográficos manualmente.
+- Nunca almacenar contraseñas en texto plano.
+- Nunca exponer el hash en respuestas HTTP, logs o mensajes de error.
+- Validar todos los datos recibidos.
+- Evitar asignación masiva de propiedades de la entidad desde el JSON.
+- Evitar enumeración de cuentas mediante mensajes de autenticación.
+- Prevenir registros duplicados mediante una restricción de unicidad en persistencia, además de la validación en Services.
+- Aplicar protección contra abuso de endpoints públicos, evaluando rate limiting para registro y autenticación.
+- No incluir credenciales, secretos o claves JWT en código fuente.
+- Mantener las políticas de autenticación y autorización actuales.
+
+### 5.2. Arquitectura y mantenibilidad
+
+- Mantener la arquitectura por capas existente.
+- Los controladores deberán limitarse a recibir solicitudes, invocar servicios y traducir resultados a respuestas HTTP.
+- La lógica de negocio deberá permanecer en Services.
+- El acceso a datos deberá realizarse mediante interfaces de Repository.
+- Se deberán utilizar DTOs para entrada y salida.
+- Se deberán reutilizar interfaces, entidades y modelos existentes cuando corresponda.
+- No crear una nueva entidad de usuario ni duplicar la persistencia.
+- Evitar introducir dependencias circulares entre proyectos.
+
+### 5.3. Rendimiento y confiabilidad
+
+- Las operaciones de base de datos deberán ser asíncronas.
+- La validación de duplicados deberá estar respaldada por una restricción única en la base de datos.
+- Los errores de persistencia deberán manejarse sin exponer detalles internos.
+- El registro deberá ser atómico desde la perspectiva del cliente: no deberá responder exitosamente si el usuario no quedó persistido.
+
+## 6. Contrato HTTP esperado
+
+| Operación | Método | Ruta | Resultado exitoso |
+|---|---|---|---|
+| Registro | POST | `/api/users` | 201 Created |
+| Inicio de sesión local | POST | `/api/users/login` | 200 OK |
+| Inicio de sesión Google existente | POST | `/api/LoginGoogle/sing-google` | Mantener contrato actual |
+
+### Respuestas de error esperadas
+
+| HTTP | Situación |
+|---|---|
+| 400 Bad Request | JSON inválido o datos de entrada que no cumplen las validaciones. |
+| 401 Unauthorized | Credenciales locales inválidas. |
+| 409 Conflict | El correo ya se encuentra registrado. |
+| 429 Too Many Requests | Se excede el límite de solicitudes, si se implementa rate limiting. |
+| 500 Internal Server Error | Error inesperado, sin revelar detalles internos. |
+
+Los errores deberán mantener un formato consistente con los patrones actuales del proyecto. Si no existe un formato común, el equipo deberá proponer uno antes de introducir respuestas incompatibles.
+
+## 7. Criterios de aceptación
+
+### CA-01 — Registro exitoso
+
+Dado que un visitante proporciona nombres, apellidos, correo y contraseña válidos, cuando envía `POST /api/users`, entonces el sistema crea una cuenta y responde `201 Created`.
+
+### CA-02 — Generación de identificador
+
+Dado un registro válido, cuando se crea el usuario, entonces `IdUser` es generado por el backend y no por el cliente.
+
+### CA-03 — Hash de contraseña
+
+Dado un registro válido, cuando el usuario queda persistido, entonces el valor almacenado en `UserEntity.Password` es un hash verificable y no coincide con la contraseña original.
+
+### CA-04 — No exposición de contraseña
+
+Dado un registro exitoso, cuando se devuelve la respuesta HTTP, entonces no se expone ni la contraseña original ni el hash.
+
+### CA-05 — Correo duplicado
+
+Dado que ya existe una cuenta con un correo determinado, cuando se intenta registrar otra cuenta utilizando el mismo correo normalizado, entonces se responde `409 Conflict` y no se crea otro usuario.
+
+### CA-06 — Validación de campos
+
+Dado que la solicitud contiene campos obligatorios ausentes, nombres vacíos, correo inválido o contraseña fuera de los límites establecidos, cuando se procesa el registro, entonces se responde `400 Bad Request`.
+
+### CA-07 — Autenticación local exitosa
+
+Dado que existe una cuenta local con contraseña válida, cuando se envía `POST /api/users/login`, entonces se responde `200 OK` y se genera un JWT válido.
+
+### CA-08 — Contraseña incorrecta
+
+Dado que el correo corresponde a una cuenta local, cuando se envía una contraseña incorrecta, entonces se responde `401 Unauthorized` sin revelar información sensible.
+
+### CA-09 — Cuenta Google sin contraseña
+
+Dado que existe una cuenta creada mediante Google sin contraseña local, cuando se intenta iniciar sesión mediante correo y contraseña, entonces el sistema rechaza la autenticación local sin generar un JWT.
+
+### CA-10 — Compatibilidad Google
+
+Dado que el flujo Google existente recibe un token válido, cuando se procesa el inicio de sesión, entonces continúa generando el JWT y manteniendo el comportamiento actual.
+
+### CA-11 — Integridad de persistencia
+
+Dado que ocurre un error al guardar el usuario, cuando finaliza la operación, entonces no se responde con éxito ni se entrega una cuenta que no haya sido persistida.
+
+### CA-12 — Restricción de unicidad
+
+Dado que dos solicitudes intentan registrar simultáneamente el mismo correo, cuando ambas llegan a persistencia, entonces como máximo una crea el usuario y la otra recibe un conflicto controlado.
+
+### CA-13 — Contrato JWT
+
+Dado un inicio de sesión local exitoso, cuando se genera el JWT, entonces contiene los claims compatibles con el sistema actual: `idUsuario`, `correoElectronico` y `nombre`, además de los claims estándar existentes.
+
+### CA-14 — Arquitectura
+
+Dado el cambio implementado, cuando se revisan los componentes, entonces el controlador no contiene lógica de persistencia ni hashing y el servicio no accede directamente al DbContext.
+
+## 8. Fuera de alcance
+
+- Recuperación de contraseña.
+- Confirmación de correo electrónico.
+- Verificación de identidad mediante OTP.
+- Autenticación multifactor.
+- Cambio de contraseña.
+- Edición de perfil.
+- Vinculación automática de cuentas Google y locales.
+- Eliminación de cuentas.
+- Roles y permisos administrativos.
+- Implementación de una nueva interfaz frontend de registro o login.
+- Migración de usuarios existentes de Google a autenticación local.
+
+## 9. Restricciones y consideraciones
+
+1. Se debe reutilizar `UserEntity`.
+2. Se debe respetar la arquitectura y convenciones actuales.
+3. Se debe mantener la compatibilidad con el JWT existente.
+4. Se debe revisar el estado real de la base de datos antes de crear una restricción única para Email.
+5. Se debe comprobar si existen correos duplicados después de normalizarlos antes de aplicar la migración.
+6. Se debe revisar la constitución SDD del proyecto antes de aprobar el plan técnico.
+7. No se deben introducir cambios ajenos al alcance de REQ-001.
+
+## 10. Referencias técnicas conocidas
+
+- `Abstracciones/Entities/UserEntity.cs`
+- `Abstracciones/Interfaces/Services/IUserServices.cs`
+- `Abstracciones/Interfaces/Repository/IUserRepository.cs`
+- `Services/UserServices.cs`
+- `Repository/UserRepository.cs`
+- `Repository/Context/CloudMediaDbContext.cs`
+- `API/Controllers/LoginGoogleController.cs`
+- `API/Program.cs`
+- `Repository/Migrations/CloudMediaDbContextModelSnapshot.cs`
+
+Las referencias anteriores son puntos de partida. Los agentes deberán inspeccionar nuevamente los archivos y confirmar su estado antes de implementar.
+
+## 11. Estado de aprobación
+
+Este documento es una propuesta de especificación. No autoriza por sí mismo la modificación de código.
+
+La implementación únicamente podrá comenzar cuando el paquete SDD completo haya sido revisado y aprobado por el usuario.
