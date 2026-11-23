@@ -1,0 +1,127 @@
+# Tasks — REQ-001
+## Registro público y autenticación de usuarios locales
+
+**Estado:** Borrador  
+**Requerimiento relacionado:** REQ-001
+
+**Documentos relacionados:**
+- `SDD/CONSTITUTION.md`
+- `specification.md`
+- `plan.md`
+- `architecture-analysis.md`
+
+---
+
+## 1. Objetivo
+
+Definir las tareas técnicas necesarias para implementar el registro público de usuarios y la autenticación mediante correo electrónico y contraseña, respetando la arquitectura actual de CloudMedia y manteniendo la compatibilidad con el inicio de sesión mediante Google.
+
+Las tareas están organizadas por fases y dependencias. Es importante respetar este orden lógico, ya que algunas actividades necesitan resultados de fases anteriores para ejecutarse correctamente. Las tareas independientes pueden desarrollarse en paralelo cuando no exista riesgo de conflictos.
+
+---
+
+## 2. Tareas
+
+### Fase 1 — Análisis de la estructura actual y base de datos
+
+- [ ] **T-001:** Inspeccionar la estructura actual de `UserEntity` y sus configuraciones en Entity Framework Core.
+- [ ] **T-002:** Analizar cómo se almacenan actualmente los correos electrónicos y cómo se gestionan los usuarios registrados mediante Google.
+- [ ] **T-003:** Verificar si existe una restricción o índice único para el correo electrónico.
+- [ ] **T-004:** Identificar posibles registros duplicados al aplicar una normalización de correos electrónicos.
+- [ ] **T-005:** Determinar los cambios necesarios en la base de datos para garantizar la unicidad del correo electrónico.
+- [ ] **T-006:** Preparar la migración correspondiente, si es necesaria, respetando la estructura existente.
+
+### Fase 2 — Contratos y modelos de transferencia de datos
+
+- [ ] **T-007:** Crear el DTO de solicitud para el registro de usuarios.
+- [ ] **T-008:** Crear el DTO de solicitud para el inicio de sesión local.
+- [ ] **T-009:** Crear un DTO de respuesta de usuario que no exponga información sensible.
+- [ ] **T-010:** Definir el contrato de respuesta de autenticación, manteniendo la compatibilidad con la estructura actual del JWT.
+- [ ] **T-011:** Implementar las validaciones necesarias para los datos recibidos en las solicitudes.
+
+### Fase 3 — Registro de usuarios
+
+- [ ] **T-012:** Implementar la normalización del correo electrónico para garantizar un tratamiento consistente.
+- [ ] **T-013:** Implementar la validación de existencia de usuarios con el mismo correo electrónico.
+- [ ] **T-014:** Implementar el mecanismo seguro de hash de contraseñas utilizando una solución especializada.
+- [ ] **T-015:** Implementar la creación de usuarios reutilizando la entidad `UserEntity` existente.
+- [ ] **T-016:** Garantizar que los usuarios registrados localmente tengan el proveedor `Local`.
+- [ ] **T-017:** Garantizar que las contraseñas nunca se almacenen en texto plano.
+- [ ] **T-018:** Implementar el manejo adecuado de intentos de registro duplicados, incluyendo conflictos de concurrencia.
+- [ ] **T-019:** Garantizar que las respuestas del registro no expongan contraseñas, hashes ni información interna.
+
+### Fase 4 — Autenticación local
+
+- [ ] **T-020:** Implementar la búsqueda del usuario mediante su correo electrónico.
+- [ ] **T-021:** Implementar la verificación de contraseñas mediante el hash almacenado.
+- [ ] **T-022:** Impedir que las cuentas registradas exclusivamente mediante Google puedan autenticarse utilizando una contraseña local inexistente.
+- [ ] **T-023:** Reutilizar el mecanismo actual de generación de JWT.
+- [ ] **T-024:** Mantener los claims actuales del token para evitar incompatibilidades.
+- [ ] **T-025:** Implementar respuestas genéricas para credenciales incorrectas, evitando revelar si un correo electrónico está registrado.
+
+### Fase 5 — Integración con la API
+
+- [ ] **T-026:** Implementar el endpoint público de registro `POST /api/users`.
+- [ ] **T-027:** Implementar el endpoint público de autenticación `POST /api/users/login`.
+- [ ] **T-028:** Integrar la funcionalidad respetando la separación de responsabilidades entre API, Services, Repository y Abstracciones.
+- [ ] **T-029:** Registrar las dependencias necesarias en la configuración de inyección de dependencias.
+- [ ] **T-030:** Implementar las protecciones de seguridad necesarias para los endpoints públicos, incluyendo limitación de solicitudes cuando corresponda.
+- [ ] **T-031:** Verificar que el endpoint de autenticación mediante Google conserve su comportamiento actual.
+
+### Fase 6 — Pruebas y validación
+
+- [ ] **T-032:** Verificar el registro exitoso de un usuario.
+- [ ] **T-033:** Verificar el registro con información incompleta o inválida.
+- [ ] **T-034:** Verificar el registro con un correo electrónico previamente utilizado.
+- [ ] **T-035:** Verificar el comportamiento ante intentos concurrentes de registro con el mismo correo electrónico.
+- [ ] **T-036:** Verificar la autenticación exitosa de un usuario local.
+- [ ] **T-037:** Verificar el rechazo de contraseñas incorrectas.
+- [ ] **T-038:** Verificar el rechazo de correos electrónicos inexistentes.
+- [ ] **T-039:** Verificar que las cuentas de Google no puedan utilizar la autenticación local sin una contraseña configurada.
+- [ ] **T-040:** Verificar que los hashes de contraseñas nunca se expongan en respuestas ni registros.
+- [ ] **T-041:** Verificar que la autenticación mediante Google siga funcionando correctamente.
+- [ ] **T-042:** Verificar la compatibilidad de los JWT y sus claims con la implementación existente.
+
+### Fase 7 — Validación final y documentación
+
+- [ ] **T-043:** Verificar que todos los requisitos funcionales y no funcionales estén satisfechos.
+- [ ] **T-044:** Verificar que la implementación respete la Constitución y las convenciones arquitectónicas del proyecto.
+- [ ] **T-045:** Comprobar que no se hayan introducido modificaciones innecesarias en funcionalidades existentes.
+- [ ] **T-046:** Verificar que todas las pruebas correspondientes se ejecuten correctamente.
+- [ ] **T-047:** Actualizar la documentación técnica específica del requerimiento.
+- [ ] **T-048:** Actualizar la documentación general del proyecto cuando los cambios introducidos afecten su arquitectura, funcionamiento o configuración.
+
+---
+
+## 3. Dependencias entre tareas
+
+Las tareas deben respetar las siguientes dependencias:
+
+1. El análisis de la entidad y la base de datos debe realizarse antes de implementar los cambios de persistencia.
+2. La estrategia de normalización y unicidad del correo electrónico debe definirse antes de implementar el registro.
+3. Los DTO y las validaciones deben estar definidos antes de integrar los endpoints.
+4. El mecanismo de hash debe estar implementado antes de almacenar contraseñas.
+5. La implementación del registro debe estar disponible antes de validar el flujo completo de autenticación local.
+6. La autenticación local debe reutilizar el mecanismo JWT existente.
+7. Las pruebas deben validar tanto las nuevas funcionalidades como la compatibilidad con Google.
+8. La documentación final debe reflejar el comportamiento realmente implementado y validado.
+
+Las tareas que no tengan dependencias directas pueden ejecutarse en paralelo siempre que no generen conflictos sobre los mismos archivos o componentes.
+
+---
+
+## 4. Criterios de finalización
+
+REQ-001 se considerará completado cuando:
+
+- El registro público de usuarios esté implementado.
+- Los usuarios registrados puedan autenticarse mediante correo electrónico y contraseña.
+- Las contraseñas se almacenen utilizando un mecanismo seguro de hash.
+- Se garantice la unicidad de los correos electrónicos.
+- Se mantenga la compatibilidad con la autenticación mediante Google.
+- Se conserve el mecanismo actual de generación de JWT y sus claims.
+- No se exponga información sensible mediante respuestas o registros.
+- Se respeten las responsabilidades y convenciones arquitectónicas existentes.
+- Las pruebas correspondientes se ejecuten correctamente.
+- La documentación técnica esté actualizada.
+- Todos los criterios de aceptación definidos en `specification.md` estén satisfechos.
