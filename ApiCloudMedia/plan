@@ -1,0 +1,408 @@
+# REQ-001 — Plan técnico de implementación
+
+## 1. Información general
+
+| Campo | Valor |
+|---|---|
+| Identificador | REQ-001 |
+| Nombre | Registro y autenticación local de usuarios |
+| Documento relacionado | `specification.md` |
+| Estado | Draft — Pendiente de aprobación |
+| Arquitectura | Monolito por capas ASP.NET Core |
+| Framework observado | .NET 10 / EF Core 10 |
+
+## 2. Objetivo del plan
+
+Definir una estrategia de implementación para incorporar el registro público y la autenticación local de usuarios, reutilizando la entidad `UserEntity` y los componentes existentes de servicios y persistencia.
+
+La solución debe mantener el flujo actual de autenticación Google, respetar la separación de responsabilidades y minimizar cambios en componentes que no estén relacionados con el requerimiento.
+
+Este plan es una propuesta inicial basada en el estado conocido del repositorio. El Architecture Analyst deberá verificarla y complementarla antes de que el Developer comience.
+
+## 3. Arquitectura actual conocida
+
+La solución está organizada en cuatro proyectos principales:
+
+| Proyecto | Responsabilidad |
+|---|---|
+| `API` | Controladores, configuración HTTP, autenticación y autorización. |
+| `Services` | Casos de uso y lógica de aplicación. |
+| `Repository` | Consultas y persistencia con EF Core. |
+| `Abstracciones` | Entidades, interfaces, DTOs y modelos compartidos. |
+
+El flujo habitual es:
+
+`HTTP → Controller → IUserServices → UserServices → IUserRepository → UserRepository → CloudMediaDbContext → SQL Server`
+
+No se deberá crear una capa Domain independiente ni reorganizar los proyectos como parte de este requerimiento.
+
+## 4. Componentes existentes relevantes
+
+### 4.1. Entidad
+
+`Abstracciones/Entities/UserEntity.cs`
+
+Propiedades observadas:
+
+- `IdUser`
+- `FirstName`
+- `LastName`
+- `Email`
+- `Password`
+- `Photo`
+- `Provider`
+
+Se reutilizará esta entidad. La propiedad `Password` deberá contener exclusivamente el hash generado por el mecanismo de hashing.
+
+No se deberá devolver directamente la entidad desde los endpoints.
+
+### 4.2. Servicios
+
+`Services/UserServices.cs`
+
+Actualmente implementa:
+
+- Validación de tokens Google.
+- Búsqueda de usuarios por correo.
+- Creación de usuarios provenientes de Google.
+- Generación del JWT.
+- Construcción de claims.
+
+Se ampliará el caso de uso de usuario con operaciones locales, procurando reutilizar la generación de JWT y evitando duplicar su lógica.
+
+### 4.3. Contrato de servicios
+
+`Abstracciones/Interfaces/Services/IUserServices.cs`
+
+Actualmente contiene `LoginWithGoogle`.
+
+Se deberá ampliar para exponer los casos de uso necesarios para:
+
+- Registrar un usuario local.
+- Autenticar un usuario local.
+
+Los tipos de retorno deberán definirse después de revisar los modelos de respuesta existentes y el contrato de `Token`.
+
+### 4.4. Repositorio
+
+`Abstracciones/Interfaces/Repository/IUserRepository.cs`
+
+Actualmente contiene:
+
+- `GetUserByEmail`
+- `CreateUserAsync`
+
+`Repository/UserRepository.cs` implementa estas operaciones utilizando `CloudMediaDbContext`.
+
+Se deberá evaluar si las operaciones existentes son suficientes o si se requiere ampliarlas para soportar la normalización y unicidad del correo.
+
+La lógica de hashing y validación de contraseñas no deberá trasladarse al repositorio.
+
+### 4.5. Composición de dependencias
+
+`API/Program.cs`
+
+Actualmente registra `IUserRepository` y `IUserServices`.
+
+Se deberán registrar las dependencias adicionales que sean necesarias para el hashing, validación o protección contra abuso, siguiendo el mecanismo de inyección de dependencias de ASP.NET Core.
+
+No se deberán registrar implementaciones duplicadas ni construir dependencias manualmente dentro de los controladores.
+
+## 5. Estrategia propuesta
+
+### Fase 0 — Análisis arquitectónico obligatorio
+
+Responsable: Architecture Analyst.
+
+Antes de modificar código, deberá:
+
+1. Leer `SDD/CONSTITUTION.md`.
+2. Leer `specification.md` y este plan.
+3. Inspeccionar los archivos relacionados con usuarios, autenticación, JWT, persistencia, configuración y pruebas.
+4. Identificar las convenciones actuales de DTOs, validación y manejo de errores.
+5. Revisar la configuración real de EF Core y SQL Server.
+6. Verificar el esquema y las migraciones relacionadas con `UserEntity`.
+7. Comprobar si existen pruebas fuente y cómo se ejecutan.
+8. Evaluar la compatibilidad del hashing propuesto con las dependencias actuales.
+9. Identificar riesgos de compatibilidad con usuarios Google existentes.
+10. Generar `architecture-analysis.md` con evidencia de archivos y líneas.
+
+El informe deberá distinguir entre hechos verificados, inferencias y aspectos desconocidos.
+
+Si la constitución no está disponible, el agente deberá informar esta condición al Orchestrator y no asumir reglas inexistentes.
+
+### Fase 1 — Diseño de contratos HTTP y modelos
+
+Responsable: Architecture Analyst, con revisión del Orchestrator.
+
+Se definirán los DTOs necesarios, siguiendo la ubicación y convenciones reales del proyecto.
+
+Como mínimo, deberán existir contratos independientes para:
+
+- Solicitud de registro local.
+- Solicitud de autenticación local.
+- Respuesta segura del registro, si no existe un modelo equivalente.
+- Respuesta de autenticación, reutilizando `Token` cuando corresponda.
+
+Los DTOs deberán incluir validaciones de entrada.
+
+No se deberá reutilizar `UserEntity` como modelo de entrada HTTP.
+
+### Fase 2 — Persistencia y unicidad
+
+Responsable: Developer.
+
+Se deberá:
+
+1. Revisar `IUserRepository` y `UserRepository`.
+2. Confirmar el comportamiento de `GetUserByEmail`.
+3. Definir una estrategia única de normalización de correo.
+4. Aplicar la misma normalización al flujo local y al flujo Google.
+5. Verificar si existen usuarios duplicados después de normalizar los correos.
+6. Diseñar una migración de EF Core para imponer la unicidad en base de datos, si el análisis confirma que es necesaria.
+7. Revisar el impacto de la migración sobre registros existentes.
+8. Implementar el manejo de conflictos de persistencia.
+
+La restricción de unicidad en la base de datos es obligatoria para evitar duplicados en solicitudes concurrentes. La comprobación previa en Services no es suficiente por sí sola.
+
+Si existen duplicados que impidan aplicar la restricción, el Developer deberá detener la migración y reportar los registros conflictivos sin eliminarlos ni modificarlos automáticamente.
+
+### Fase 3 — Registro local
+
+Responsable: Developer.
+
+Se implementará el caso de uso de registro en `UserServices`.
+
+Flujo propuesto:
+
+1. Recibir el DTO de registro.
+2. Validar y normalizar el correo.
+3. Validar los datos obligatorios.
+4. Comprobar si ya existe una cuenta con el correo.
+5. Generar el hash de la contraseña mediante un mecanismo especializado.
+6. Construir una instancia de `UserEntity`.
+7. Asignar `IdUser` en el backend.
+8. Asignar `Provider = "Local"`.
+9. Asignar el hash a la propiedad `Password`.
+10. Persistir utilizando `IUserRepository`.
+11. Devolver una respuesta segura mediante DTO.
+
+No se deberá incluir la contraseña original ni su hash en la respuesta.
+
+La operación deberá traducir los conflictos de unicidad a un resultado de dominio que el controlador pueda transformar en `409 Conflict`.
+
+### Fase 4 — Autenticación local
+
+Responsable: Developer.
+
+Se implementará la autenticación local en `UserServices`.
+
+Flujo propuesto:
+
+1. Recibir correo y contraseña.
+2. Normalizar el correo.
+3. Buscar al usuario mediante `IUserRepository`.
+4. Verificar que la cuenta admite autenticación local.
+5. Verificar la contraseña utilizando el componente de hashing.
+6. Rechazar credenciales inválidas con un resultado genérico.
+7. Generar el JWT reutilizando el mecanismo actual.
+8. Mantener los claims existentes y el modelo `Token`.
+
+La implementación no deberá permitir iniciar sesión localmente con una cuenta Google que no tenga una contraseña local configurada.
+
+La lógica de generación de JWT deberá mantenerse centralizada para evitar divergencias entre autenticación Google y local.
+
+### Fase 5 — Controladores y respuestas HTTP
+
+Responsable: Developer.
+
+Se incorporarán las operaciones:
+
+- `POST /api/users`
+- `POST /api/users/login`
+
+Se deberá seguir la estructura de controladores actual y revisar las convenciones de rutas, interfaces y respuestas HTTP.
+
+Los controladores deberán:
+
+- Recibir los DTOs.
+- Invocar `IUserServices`.
+- Traducir resultados a códigos HTTP.
+- No implementar hashing.
+- No acceder directamente al DbContext.
+- No contener reglas de negocio.
+
+Las operaciones serán públicas mediante la política de autorización correspondiente, sin debilitar la protección de los demás controladores.
+
+### Fase 6 — Registro de dependencias y configuración
+
+Responsable: Developer.
+
+Se deberán registrar los componentes adicionales en `API/Program.cs`.
+
+Se deberá evaluar protección contra abuso para endpoints públicos, especialmente rate limiting en registro y autenticación.
+
+No se deberán introducir secretos en código fuente ni modificar la configuración JWT existente salvo que el análisis demuestre una necesidad justificada.
+
+### Fase 7 — Pruebas
+
+Responsable: Testing Engineer.
+
+Las pruebas deberán cubrir como mínimo:
+
+- Registro exitoso.
+- Validación de campos.
+- Correo duplicado.
+- Normalización del correo.
+- Hash de contraseña.
+- Ausencia de datos sensibles en respuestas.
+- Login exitoso.
+- Contraseña incorrecta.
+- Cuenta Google sin contraseña local.
+- Compatibilidad del login Google.
+- Conflictos concurrentes de registro.
+- Generación y validación de JWT.
+- Respuestas HTTP esperadas.
+
+El Testing Engineer deberá inspeccionar primero la infraestructura de pruebas existente. Si no hay un proyecto de pruebas funcional, deberá proponer la forma mínima de incorporar pruebas sin alterar producción.
+
+No podrá modificar código productivo.
+
+### Fase 8 — Revisión independiente
+
+Responsable: Code Reviewer.
+
+Deberá revisar:
+
+- Cumplimiento de la especificación.
+- Separación de responsabilidades.
+- Uso correcto de DTOs.
+- Hashing y verificación de contraseñas.
+- Normalización y unicidad de correo.
+- Manejo de errores.
+- Compatibilidad con Google.
+- Generación de JWT.
+- Riesgos de enumeración de usuarios.
+- Seguridad de endpoints públicos.
+- Calidad y mantenibilidad.
+- Regresiones potenciales.
+
+No podrá modificar código.
+
+### Fase 9 — Documentación
+
+Responsable: Documentation Writer.
+
+Deberá documentar:
+
+- Nuevos endpoints.
+- Contratos de solicitud y respuesta.
+- Reglas de autenticación local.
+- Manejo de errores.
+- Configuración relevante.
+- Migraciones necesarias.
+- Pruebas realizadas.
+
+La documentación deberá basarse en el diff real, pruebas ejecutadas y revisión aprobada. No deberá describir como implementado algo que solamente esté en la especificación.
+
+## 6. Decisiones técnicas y restricciones
+
+1. Reutilizar `UserEntity`.
+2. Reutilizar `IUserServices` y `UserServices`.
+3. Reutilizar `IUserRepository` y `UserRepository`.
+4. Mantener `CloudMediaDbContext` como mecanismo de persistencia.
+5. No introducir una capa Domain.
+6. Utilizar DTOs para contratos HTTP.
+7. Utilizar hashing de contraseñas especializado; no implementar criptografía propia.
+8. Reutilizar la generación actual de JWT.
+9. Mantener la autenticación Google.
+10. Normalizar el correo de forma consistente.
+11. Respaldar la unicidad con una restricción en base de datos.
+12. No eliminar ni modificar usuarios existentes automáticamente.
+13. No realizar refactorizaciones ajenas al requerimiento.
+14. No cambiar contratos existentes sin justificación y aprobación.
+
+## 7. Riesgos y mitigaciones
+
+| Riesgo | Mitigación |
+|---|---|
+| Correos duplicados existentes | Inspeccionar datos antes de crear la restricción única. |
+| Dos registros simultáneos | Restricción única en base de datos y manejo de conflicto. |
+| Exposición de contraseñas | DTOs independientes, hashing y revisión de respuestas/logs. |
+| Incompatibilidad Google | Pruebas de regresión del flujo existente. |
+| JWT inconsistente | Reutilizar la generación actual y verificar claims. |
+| Enumeración de cuentas | Mensajes genéricos en autenticación. |
+| Abuso de endpoints públicos | Evaluar y aplicar rate limiting. |
+| Cambios inesperados de esquema | Revisar migraciones y snapshot antes de modificar la base. |
+
+## 8. Archivos potencialmente afectados
+
+La lista es preliminar y deberá confirmarse con el análisis arquitectónico.
+
+### Abstracciones
+
+- `Abstracciones/Entities/UserEntity.cs` — solo si el análisis determina un cambio necesario.
+- `Abstracciones/Interfaces/Services/IUserServices.cs`
+- `Abstracciones/Interfaces/Repository/IUserRepository.cs`
+- Nuevos DTOs de registro y login, según las convenciones actuales.
+- Posible modelo de respuesta de registro.
+
+### Services
+
+- `Services/UserServices.cs`
+
+### Repository
+
+- `Repository/UserRepository.cs`
+- `Repository/Context/CloudMediaDbContext.cs`
+- Nueva migración EF Core, si se requiere.
+
+### API
+
+- Nuevo controlador de usuarios o extensión del controlador que corresponda según convenciones.
+- `API/Program.cs`, si se requieren registros adicionales.
+
+### Pruebas y documentación
+
+- Proyecto de pruebas existente o uno nuevo aprobado.
+- Documentación técnica general relacionada con autenticación y endpoints.
+
+No se autoriza modificar todos estos archivos por el simple hecho de aparecer en esta lista. Cada cambio debe estar justificado por una tarea aprobada.
+
+## 9. Estrategia de integración
+
+La implementación deberá conservar el comportamiento de los siguientes flujos:
+
+**Registro local:**
+
+`HTTP → UsersController → IUserServices → UserServices → IUserRepository → UserRepository → SQL Server`
+
+**Autenticación local:**
+
+`HTTP → UsersController → IUserServices → UserServices → IUserRepository → UserRepository → SQL Server → JWT`
+
+**Autenticación Google existente:**
+
+`HTTP → LoginGoogleController → IUserServices → UserServices → Google Validation → IUserRepository → JWT`
+
+La nueva funcionalidad no deberá introducir dependencias de la capa API dentro de Repository ni trasladar lógica de negocio al controlador.
+
+## 10. Condiciones de salida
+
+El plan se considerará completado cuando:
+
+- Los dos endpoints cumplan la especificación.
+- Las contraseñas se almacenen con hashing seguro.
+- Los usuarios locales puedan autenticarse.
+- Google continúe funcionando.
+- La unicidad del correo esté garantizada.
+- Las pruebas relevantes hayan sido ejecutadas.
+- El Code Reviewer no mantenga hallazgos bloqueantes sin resolver.
+- La documentación refleje la implementación real.
+- El usuario haya revisado y aprobado el resultado final.
+
+## 11. Control de aprobación
+
+Este plan no autoriza automáticamente la implementación.
+
+El Main Orchestrator deberá presentar el análisis arquitectónico y el paquete SDD al usuario. El Developer solo podrá iniciar después de recibir aprobación explícita.
