@@ -1,0 +1,346 @@
+# CLOUDMEDIA — PROJECT CONSTITUTION
+
+**Proyecto:** Self-Host Cloud Media  
+**Versión:** 1.0  
+**Estado:** Vigente  
+**Alcance:** Todo el código fuente, infraestructura, base de datos, almacenamiento y documentación del proyecto.
+
+---
+
+# 1. Propósito
+
+Esta Constitución establece los principios, reglas arquitectónicas, estándares de desarrollo y requisitos de seguridad que deben respetarse durante todo el ciclo de vida de CloudMedia.
+
+Su objetivo es garantizar que el proyecto evolucione de manera segura, mantenible, escalable y consistente, evitando decisiones técnicas que comprometan su estabilidad o introduzcan deuda técnica innecesaria.
+
+Estas reglas son de cumplimiento obligatorio para cualquier funcionalidad nueva, modificación, corrección de errores, refactorización o integración.
+
+Ningún requerimiento justifica ignorar estas reglas sin una excepción explícitamente documentada y aprobada.
+
+# 2. Principios fundamentales
+
+## 2.1. Simplicidad y mantenibilidad
+
+- El código debe ser fácil de entender, mantener y extender.
+- Se debe evitar la complejidad innecesaria.
+- No se deben introducir abstracciones sin una justificación técnica real.
+- Se debe priorizar la reutilización de componentes existentes cuando sea apropiado.
+- Se debe evitar duplicar lógica de negocio.
+- Cada componente debe tener una responsabilidad clara.
+
+## 2.2. Seguridad desde el diseño
+
+- La seguridad debe considerarse desde el diseño de cada funcionalidad, no únicamente durante su implementación.
+- Toda entrada externa debe considerarse no confiable.
+- El sistema debe aplicar el principio de mínimo privilegio.
+- Los datos sensibles deben protegerse tanto en tránsito como en almacenamiento.
+- Las validaciones del frontend nunca sustituyen las validaciones del backend.
+- Ninguna funcionalidad debe introducir vulnerabilidades conocidas para facilitar su implementación.
+
+## 2.3. Compatibilidad y estabilidad
+
+- Los cambios deben preservar el comportamiento de funcionalidades existentes, salvo que un requerimiento aprobado indique expresamente lo contrario.
+- No se deben modificar contratos públicos, rutas, estructuras de respuesta o claims de autenticación sin evaluar su impacto.
+- Los cambios en la base de datos deben considerar los datos existentes.
+- Las modificaciones deben ser compatibles con el resto de los componentes del sistema.
+
+## 2.4. Evidencia antes que suposiciones
+
+- Las decisiones técnicas deben basarse en el código, la configuración y la arquitectura real del proyecto.
+- No se deben inventar clases, métodos, rutas, tablas, servicios o dependencias.
+- La documentación debe reflejar el comportamiento real del sistema.
+- Cuando exista incertidumbre técnica, debe identificarse y resolverse antes de introducir cambios que puedan afectar la estabilidad.
+
+# 3. Arquitectura del proyecto
+
+## 3.1. Arquitectura establecida
+
+CloudMedia utiliza una separación de responsabilidades basada en las siguientes capas:
+
+- **API:** expone los endpoints HTTP, recibe solicitudes y devuelve respuestas.
+- **Services:** contiene la lógica de negocio y coordina las operaciones del sistema.
+- **Repository:** gestiona el acceso y la persistencia de datos.
+- **Abstracciones:** contiene las entidades, contratos e interfaces que permiten desacoplar las dependencias.
+
+Flujo general:
+
+`API → Services → Repository → Entity Framework Core → SQL Server`
+
+## 3.2. Reglas arquitectónicas obligatorias
+
+- Se debe respetar la estructura de carpetas y responsabilidades existente.
+- No se debe introducir una nueva capa arquitectónica sin una justificación técnica y aprobación explícita.
+- No se debe crear una carpeta `Domain` ni migrar la arquitectura actual hacia otro patrón por iniciativa propia.
+- Los controladores deben mantenerse delgados y no contener lógica de negocio.
+- La lógica de negocio debe residir en Services.
+- El acceso a datos debe centralizarse en Repository.
+- Los contratos e interfaces deben mantenerse en Abstracciones siguiendo las convenciones existentes.
+- No se debe acceder directamente a Entity Framework Core desde los controladores.
+- No se debe duplicar el acceso a datos en distintas capas.
+- Las dependencias deben mantenerse explícitas mediante inyección de dependencias.
+- Se deben evitar dependencias circulares entre componentes.
+
+## 3.3. SOLID y separación de responsabilidades
+
+- Se debe respetar el principio de responsabilidad única.
+- Las clases deben estar abiertas a extensión y cerradas a modificaciones innecesarias.
+- Las abstracciones deben utilizarse cuando aporten desacoplamiento real.
+- Las interfaces deben representar contratos coherentes y específicos.
+- Se debe evitar crear clases con demasiadas responsabilidades.
+- No se deben utilizar patrones de diseño únicamente por cumplir una tendencia o convención.
+
+# 4. Estándares de desarrollo
+
+## 4.1. Código limpio
+
+- Utilizar nombres descriptivos para clases, métodos, variables y propiedades.
+- Mantener métodos pequeños y enfocados en una única responsabilidad.
+- Evitar código duplicado.
+- Evitar números y cadenas mágicas.
+- Eliminar código muerto y dependencias que no se utilicen.
+- Mantener consistencia con las convenciones existentes.
+- No introducir comentarios que simplemente repitan lo que hace el código.
+- Documentar decisiones complejas cuando sea necesario.
+
+## 4.2. C# y .NET
+
+- Utilizar las características compatibles con la versión de .NET establecida en el proyecto.
+- Aprovechar async/await para operaciones de entrada y salida.
+- Evitar operaciones bloqueantes innecesarias.
+- Propagar correctamente los errores y excepciones.
+- Evitar capturar excepciones genéricas sin un tratamiento apropiado.
+- Utilizar tipos de datos adecuados y evitar conversiones innecesarias.
+- Aplicar nullable reference types de manera consistente con la configuración del proyecto.
+- No utilizar `async void` salvo en los casos específicos donde el framework lo requiera.
+- Utilizar cancelación mediante `CancellationToken` cuando corresponda, especialmente en operaciones de larga duración.
+
+## 4.3. Manejo de errores
+
+- Los errores deben gestionarse de forma consistente.
+- No se deben exponer stack traces, rutas internas, consultas SQL ni detalles de implementación al cliente.
+- Los errores deben registrarse con información suficiente para facilitar su diagnóstico.
+- No se deben ocultar errores mediante respuestas exitosas ficticias.
+- Se deben utilizar códigos HTTP adecuados.
+- Los mensajes de error deben ser claros sin revelar información sensible.
+
+# 5. Seguridad
+
+La seguridad es un requisito obligatorio y no negociable.
+
+## 5.1. Autenticación y autorización
+
+- Los recursos privados deben requerir autenticación.
+- La autorización debe verificarse en el backend para cada operación protegida.
+- No se debe confiar en identificadores de usuario enviados por el cliente para determinar la identidad del usuario autenticado.
+- La identidad debe obtenerse de los claims validados del mecanismo de autenticación.
+- Cada usuario únicamente debe poder acceder a los recursos que le pertenecen o para los cuales tenga autorización explícita.
+- Las operaciones de lectura, modificación y eliminación deben verificar la propiedad del recurso.
+- Los endpoints públicos deben limitarse a las funcionalidades que realmente necesiten acceso anónimo.
+- No se deben almacenar contraseñas en texto plano.
+- Las contraseñas deben procesarse mediante algoritmos especializados de hashing de contraseñas, nunca mediante cifrado reversible o hashes rápidos genéricos.
+- La verificación de contraseñas debe utilizar el mecanismo correspondiente al algoritmo de hashing.
+- Los tokens JWT deben validarse correctamente, incluyendo firma, emisor, audiencia y expiración según la configuración del proyecto.
+- Las claves de firma de tokens deben mantenerse fuera del código fuente.
+- Nunca se deben registrar tokens completos, contraseñas o credenciales.
+
+## 5.2. Protección de información sensible
+
+- Nunca se deben almacenar secretos, contraseñas, claves privadas, tokens de acceso o credenciales directamente en el repositorio.
+- Los secretos deben gestionarse mediante variables de entorno o mecanismos seguros de configuración.
+- Los archivos de configuración con información sensible deben excluirse del control de versiones.
+- Los archivos de ejemplo deben contener valores ficticios y nunca credenciales reales.
+- Los logs no deben contener contraseñas, tokens, claves privadas ni información sensible innecesaria.
+- Las respuestas de la API deben exponer únicamente los datos necesarios.
+- Los DTO deben utilizarse para controlar qué información puede entrar y salir del sistema.
+- No se debe devolver directamente una entidad de base de datos cuando pueda exponer propiedades internas o sensibles.
+
+## 5.3. Validación de entradas
+
+- Toda entrada proveniente del cliente debe validarse en el backend.
+- Se deben validar formatos, longitudes, rangos y campos obligatorios.
+- Se deben utilizar consultas parametrizadas y mecanismos seguros de acceso a datos.
+- Se debe prevenir SQL Injection.
+- Se debe prevenir Cross-Site Scripting cuando exista contenido que pueda interpretarse en un navegador.
+- Se debe prevenir Path Traversal en cualquier operación relacionada con rutas o archivos.
+- Se deben validar los identificadores y las relaciones entre recursos.
+- No se debe confiar en extensiones de archivos, nombres o MIME types proporcionados únicamente por el cliente.
+
+## 5.4. Protección de endpoints
+
+- Los endpoints públicos deben tener protecciones contra abuso.
+- Se debe considerar rate limiting en operaciones sensibles como autenticación, registro y carga de archivos.
+- Se deben aplicar límites razonables de tamaño de solicitud.
+- Los errores de autenticación deben evitar revelar información que facilite la enumeración de usuarios.
+- Las operaciones que puedan consumir recursos significativos deben tener límites y controles apropiados.
+
+## 5.5. Dependencias y vulnerabilidades
+
+- Se deben utilizar dependencias conocidas y mantenidas.
+- Se deben evitar paquetes innecesarios.
+- Se deben revisar las vulnerabilidades conocidas de las dependencias cuando se introduzcan o actualicen paquetes.
+- No se deben utilizar versiones comprometidas o con vulnerabilidades críticas conocidas sin una justificación y mitigación documentadas.
+- No se debe desactivar una protección de seguridad para hacer funcionar una dependencia sin evaluar sus consecuencias.
+
+# 6. Seguridad del almacenamiento multimedia
+
+CloudMedia administra archivos multimedia, por lo que el almacenamiento debe tratarse como una superficie crítica de seguridad.
+
+## 6.1. Carga de archivos
+
+- Todo archivo recibido debe considerarse potencialmente malicioso.
+- Se deben establecer límites de tamaño para las cargas.
+- Se deben validar los tipos de archivo permitidos.
+- No se debe confiar exclusivamente en la extensión o el MIME type enviado por el cliente.
+- Cuando corresponda, se debe verificar el contenido real del archivo mediante su firma o estructura.
+- Se deben utilizar nombres internos seguros para almacenar archivos.
+- No se deben utilizar directamente nombres de archivos proporcionados por el usuario como rutas físicas.
+- Se deben prevenir archivos ejecutables o formatos no permitidos.
+- Se debe considerar el riesgo de archivos diseñados para consumir recursos excesivos al procesarse.
+- Las operaciones de carga deben estar protegidas por autenticación y autorización, salvo que exista un caso público expresamente aprobado.
+
+## 6.2. Acceso y propiedad de archivos
+
+- Cada archivo debe estar asociado correctamente con su propietario.
+- Un usuario no debe poder consultar, descargar, modificar o eliminar archivos pertenecientes a otro usuario sin autorización.
+- La autorización debe verificarse en el backend antes de acceder al archivo físico.
+- No se debe asumir que conocer el identificador de un archivo otorga permiso para acceder a él.
+- Las rutas físicas de almacenamiento no deben exponerse al cliente.
+- No se deben permitir rutas arbitrarias proporcionadas por el usuario.
+- Las descargas deben pasar por mecanismos que validen la autorización correspondiente.
+
+## 6.3. Integridad y eliminación
+
+- Las operaciones sobre archivos deben mantener consistencia entre los metadatos de la base de datos y el almacenamiento físico.
+- Se deben contemplar fallos parciales durante cargas, eliminaciones y actualizaciones.
+- No se deben eliminar archivos físicos sin verificar que la operación corresponda al recurso autorizado.
+- Se deben evitar eliminaciones accidentales de archivos pertenecientes a otros usuarios.
+- Las operaciones de eliminación deben contemplar las relaciones existentes entre archivos y registros de la base de datos.
+- Los procesos de limpieza deben ser controlados y no afectar archivos ajenos al alcance de la operación.
+
+## 6.4. Procesamiento multimedia
+
+- El procesamiento de imágenes y videos debe considerar límites de memoria, CPU y tiempo de ejecución.
+- Se deben prevenir cargas que provoquen agotamiento de recursos.
+- Las operaciones pesadas deben diseñarse para no bloquear innecesariamente las solicitudes HTTP.
+- Los archivos originales y derivados deben mantener relaciones identificables.
+- No se debe confiar en los metadatos proporcionados por el cliente sin validación.
+
+# 7. Base de datos y persistencia
+
+- SQL Server es el motor de base de datos establecido por el proyecto.
+- Entity Framework Core debe utilizarse siguiendo las convenciones existentes.
+- Las consultas deben ser eficientes y limitar los datos recuperados a lo necesario.
+- Se debe evitar cargar entidades completas cuando solo se requieren algunas propiedades.
+- Se debe prevenir el problema N+1 en consultas relacionadas.
+- Las operaciones que requieran consistencia deben utilizar transacciones cuando corresponda.
+- Las restricciones de integridad deben garantizarse también en la base de datos cuando sea necesario.
+- No se debe depender exclusivamente de validaciones en memoria para garantizar unicidad o integridad.
+- Las migraciones deben ser coherentes con el modelo actual.
+- No se deben eliminar columnas, tablas o registros existentes sin evaluar el impacto.
+- Las migraciones deben contemplar los datos existentes y evitar pérdidas de información.
+- No se deben ejecutar cambios destructivos en la base de datos sin una justificación explícita.
+- Las consultas SQL manuales deben ser parametrizadas.
+- Se deben utilizar índices cuando aporten beneficios reales al rendimiento.
+
+# 8. API y contratos
+
+- Los endpoints deben seguir convenciones REST consistentes con la API existente.
+- Los métodos HTTP deben representar correctamente las operaciones.
+- Los códigos de estado HTTP deben corresponder al resultado real.
+- Las solicitudes y respuestas deben utilizar DTO específicos cuando corresponda.
+- No se deben exponer entidades internas de persistencia como contratos públicos.
+- Los cambios en contratos existentes deben evaluar su impacto en los consumidores.
+- Se deben mantener consistentes los formatos de respuesta.
+- Los endpoints deben validar la autenticación y autorización antes de ejecutar operaciones protegidas.
+- No se deben introducir rutas duplicadas o ambiguas.
+
+# 9. Rendimiento y uso de recursos
+
+- Las operaciones de base de datos deben evitar consultas innecesarias.
+- Las operaciones de archivos deben considerar el consumo de memoria y almacenamiento.
+- Se debe evitar cargar archivos multimedia completos en memoria cuando exista una alternativa eficiente.
+- Las operaciones de lectura de archivos grandes deben considerar streaming cuando corresponda.
+- Se deben establecer límites para cargas, descargas y procesamiento multimedia.
+- Las consultas que puedan devolver grandes cantidades de registros deben considerar paginación.
+- No se deben introducir procesos costosos dentro de solicitudes HTTP sin evaluar su impacto.
+- Las optimizaciones deben basarse en necesidades reales y no introducir complejidad injustificada.
+
+# 10. Pruebas y calidad
+
+- Toda funcionalidad nueva debe contar con pruebas apropiadas según su complejidad y riesgo.
+- Se deben probar los casos exitosos, errores y escenarios límite.
+- Las funcionalidades de autenticación y autorización requieren pruebas específicas.
+- Se deben probar los casos de acceso no autorizado a recursos multimedia.
+- Los cambios en persistencia deben validar su comportamiento con la base de datos.
+- Las correcciones de errores deben incluir pruebas que eviten su reaparición cuando sea viable.
+- No se debe considerar una funcionalidad terminada únicamente porque compila.
+- No se deben ignorar pruebas fallidas para declarar una implementación exitosa.
+- Las pruebas deben ser reproducibles y no depender de datos personales o credenciales reales.
+- Las pruebas deben evitar modificar datos reales fuera de los entornos destinados a pruebas.
+
+# 11. Git y control de versiones
+
+- Los cambios deben ser claros, acotados y relacionados con un objetivo identificable.
+- No se deben incluir archivos temporales, binarios innecesarios o secretos en los commits.
+- No se deben modificar archivos ajenos al alcance del requerimiento sin justificación.
+- No se deben sobrescribir cambios existentes sin comprender su propósito.
+- No se deben ejecutar operaciones destructivas de Git sin autorización explícita.
+- Los commits deben tener mensajes descriptivos.
+- Los archivos generados deben incluirse únicamente cuando formen parte del funcionamiento o distribución del proyecto.
+- Los archivos locales de configuración y datos personales deben permanecer fuera del repositorio.
+
+# 12. Documentación
+
+- La documentación debe mantenerse alineada con el comportamiento real del sistema.
+- Los cambios arquitectónicos deben reflejarse en la documentación general.
+- Los nuevos endpoints deben documentarse.
+- Las configuraciones necesarias para ejecutar una funcionalidad deben documentarse.
+- Las variables de entorno deben describirse sin incluir valores secretos.
+- Las decisiones técnicas importantes deben documentarse cuando afecten el mantenimiento futuro.
+- No se debe documentar como implementada una funcionalidad que únicamente esté planificada.
+- Los documentos SDD deben mantenerse actualizados cuando cambien los requisitos o las decisiones aprobadas.
+
+# 13. Gestión de cambios y excepciones
+
+- Todo cambio debe tener un objetivo claro y un alcance definido.
+- Se debe evaluar el impacto sobre la arquitectura, seguridad, persistencia y funcionalidades existentes.
+- No se deben introducir refactorizaciones no relacionadas con el requerimiento.
+- Si una implementación requiere modificar una regla de esta Constitución, la excepción debe documentarse.
+- La excepción debe incluir su justificación, alcance, riesgos, medidas de mitigación y aprobación explícita.
+- Una excepción no modifica permanentemente esta Constitución.
+- Si una regla entra en conflicto con un requisito, no se debe ignorar silenciosamente: el conflicto debe resolverse antes de continuar.
+
+# 14. Reglas no negociables
+
+Las siguientes reglas tienen prioridad sobre cualquier conveniencia de implementación:
+
+1. Nunca almacenar contraseñas en texto plano.
+2. Nunca exponer secretos, credenciales, tokens o claves privadas.
+3. Nunca permitir que un usuario acceda a archivos o información de otro usuario sin autorización.
+4. Nunca confiar exclusivamente en validaciones realizadas por el frontend.
+5. Nunca permitir acceso arbitrario al sistema de archivos mediante rutas proporcionadas por el cliente.
+6. Nunca introducir consultas SQL vulnerables a inyección.
+7. Nunca eliminar o modificar datos existentes sin evaluar el impacto y contar con la autorización correspondiente.
+8. Nunca modificar la arquitectura establecida sin justificación y aprobación explícitas.
+9. Nunca introducir una nueva capa arquitectónica por iniciativa propia.
+10. Nunca romper contratos existentes sin evaluar y aprobar el impacto.
+11. Nunca ocultar errores o declarar exitosas operaciones que realmente fallaron.
+12. Nunca introducir secretos o información sensible en el repositorio o los logs.
+13. Nunca declarar terminada una funcionalidad sin validar sus criterios de aceptación y pruebas correspondientes.
+14. Nunca documentar como existente una funcionalidad que no haya sido implementada y verificada.
+
+# 15. Criterio de cumplimiento
+
+Todo cambio realizado en CloudMedia debe cumplir esta Constitución.
+
+Antes de considerar una implementación completa, se debe verificar que:
+
+- Respeta la arquitectura y separación de responsabilidades.
+- Cumple los requisitos de seguridad aplicables.
+- Mantiene la integridad de los datos.
+- No introduce regresiones conocidas.
+- Cuenta con validaciones y pruebas apropiadas.
+- Mantiene actualizada la documentación correspondiente.
+- No incumple ninguna regla no negociable.
+
+**La seguridad, integridad de los datos y protección de los archivos de los usuarios tienen prioridad sobre la velocidad de implementación y la simplicidad de una solución que comprometa estos principios.**
