@@ -35,6 +35,32 @@ Use this skill when the user requests:
 - Identification of components that could be affected by a change.
 - An explanation of existing architectural conventions and patterns.
 
+## 2.1 Default Invocation Behavior
+
+When the skill is explicitly invoked without additional arguments,
+perform a comprehensive architectural analysis of the current project.
+
+Do not ask the user what they want to analyze.
+
+By default:
+
+1. Discover the current project structure.
+2. Identify the architectural layers and their responsibilities.
+3. Explain the main components and their dependencies.
+4. Trace the most important application execution flows.
+5. Identify relevant architectural conventions and design patterns.
+6. Highlight important dependencies and integration points.
+7. Identify architectural inconsistencies and potential maintenance risks.
+8. Explain what developers should understand before modifying
+   existing functionality.
+9. Provide practical recommendations to minimize regression risks.
+
+Analyze the project progressively and clearly state which areas
+were inspected and which were outside the analysis scope.
+
+If the skill is invoked with a specific feature or proposed change,
+prioritize that scope instead of performing a full project analysis.
+
 Do not use this skill to implement changes, refactor code, or modify
 project configuration.
 
