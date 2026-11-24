@@ -1,0 +1,555 @@
+
+
+
+
+⸻
+
+name: CloudMedia Backend Architecture Standards
+description: Mandatory backend development standards for CloudMedia. Requires the Developer Agent to investigate and follow the project’s existing architecture, layer responsibilities, business logic patterns, HTTP API conventions, persistence mechanisms, and security practices instead of introducing different implementation patterns.
+applyTo: “/{Abstracciones,Repository,Services,API}//*.cs”
+
+CloudMedia Backend Architecture & Development Standards
+
+1. Primary objective
+
+These instructions define the mandatory backend development standards for the CloudMedia project.
+
+The primary objective is to ensure that every new backend implementation follows the same architectural decisions, coding conventions, layer responsibilities, business logic patterns, HTTP API conventions, and security practices already established in the project.
+
+The Developer Agent MUST develop new functionality consistently with the existing codebase.
+
+The existing CloudMedia implementation is the primary reference for how new backend functionality must be developed.
+
+Do not introduce a different architecture, programming style, implementation strategy, or set of conventions simply because another approach is generally considered better.
+
+Do not assume that a generic Clean Architecture, repository pattern, enterprise architecture, or ASP.NET Core tutorial represents the architecture of this project.
+
+The actual source code and approved project documentation take precedence over generic recommendations.
+
+2. Mandatory investigation before implementation
+
+Before creating or modifying backend code, the Developer Agent MUST investigate the existing implementation relevant to the requested functionality.
+
+Never start coding based exclusively on the requirement description.
+
+2.1 Understand the existing architecture
+
+Inspect the actual solution and identify:
+
+* Existing projects and their responsibilities.
+* Project references and dependency directions.
+* Existing namespaces and folder organization.
+* Dependency injection configuration.
+* Existing interfaces and their implementations.
+* Existing entity and model definitions.
+* Existing services and repositories.
+* Existing API controllers and endpoints.
+* Existing database context and entity configurations.
+* Existing authentication and authorization mechanisms.
+* Existing file storage mechanisms.
+* Existing validation and exception handling.
+* Existing response and serialization conventions.
+
+Use actual source code as evidence.
+
+Do not assume that a folder name represents a particular responsibility without examining its contents.
+
+2.2 Identify comparable implementations
+
+For every new functionality, find at least one existing implementation that performs a similar responsibility.
+
+For example:
+
+New implementation	Existing code to investigate
+New HTTP endpoint	Similar existing controller and endpoint
+New business operation	Similar existing service method
+New database operation	Similar existing repository method
+New entity	Existing entities and EF Core configurations
+New request model	Existing request DTOs
+New response model	Existing response DTOs
+New validation	Existing validation mechanisms
+New authentication behavior	Existing authentication implementation
+New file operation	Existing file storage implementation
+
+Inspect the complete relevant flow whenever possible.
+
+Do not copy isolated code snippets without understanding how the surrounding layers interact.
+
+2.3 Follow existing conventions
+
+After investigating the project, identify the conventions used by the existing implementation.
+
+The new functionality MUST follow those conventions unless an explicit requirement or approved architectural decision justifies a change.
+
+If the existing code contains multiple different patterns:
+
+1. Identify the differences.
+2. Determine which pattern is currently used for the closest equivalent functionality.
+3. Prefer the most relevant and established implementation.
+4. Do not arbitrarily combine incompatible approaches.
+5. If the correct convention cannot be determined, ask for clarification before introducing another pattern.
+
+3. CloudMedia architectural boundaries
+
+The known backend solution contains the following projects:
+
+* Abstracciones
+* Repository
+* Services
+* API
+
+The Developer Agent MUST inspect the actual project references and source code to understand their responsibilities.
+
+The following boundaries must be respected:
+
+3.1 Abstracciones
+
+This project contains shared abstractions used by the backend.
+
+Before introducing or modifying an abstraction:
+
+* Inspect existing interfaces and shared models.
+* Follow established naming conventions.
+* Reuse existing contracts when appropriate.
+* Avoid duplicating existing abstractions.
+* Avoid placing implementation-specific logic in shared contracts.
+* Maintain compatibility with existing consumers.
+
+Do not assume every new class belongs in this project.
+
+Place new abstractions according to the existing organization and responsibility of the project.
+
+3.2 Repository
+
+The Repository project is responsible for database access and persistence operations.
+
+The Developer Agent MUST:
+
+* Follow existing repository implementation patterns.
+* Respect the existing Entity Framework Core configuration.
+* Reuse the established DbContext and persistence mechanisms.
+* Follow existing query and data retrieval conventions.
+* Respect entity relationships and database constraints.
+* Follow existing asynchronous database access patterns.
+* Respect existing transaction and persistence behavior.
+* Avoid duplicating database access logic in Services or API.
+* Avoid introducing alternative persistence mechanisms without justification.
+
+Business rules must not be moved into Repository simply because they involve database queries.
+
+Repository is responsible for persistence, not for taking over the entire business workflow.
+
+Do not introduce another repository abstraction or persistence layer if the existing architecture does not require it.
+
+3.3 Services
+
+The Services project is responsible for the business operations implemented by the application.
+
+The Developer Agent MUST:
+
+* Place business logic in the appropriate existing service.
+* Follow the current service organization and naming conventions.
+* Reuse existing services and abstractions where appropriate.
+* Keep business operations consistent with existing workflows.
+* Respect the existing dependency injection approach.
+* Avoid placing business logic directly in API controllers.
+* Avoid placing database implementation details in Services when they belong in Repository.
+* Avoid duplicating business rules across multiple services.
+* Preserve existing business behavior.
+
+When implementing a new operation, inspect how similar operations coordinate validation, business rules, persistence, file storage, and error handling.
+
+Do not introduce unnecessary service layers, managers, handlers, factories, or other abstractions.
+
+3.4 API
+
+The API project is responsible for exposing the application’s HTTP interface.
+
+The Developer Agent MUST:
+
+* Follow the existing controller and endpoint organization.
+* Respect the existing routing conventions.
+* Follow the established HTTP method and response conventions.
+* Respect existing request and response models.
+* Follow existing dependency injection patterns.
+* Delegate business operations to Services.
+* Avoid implementing business workflows directly inside controllers.
+* Respect existing authentication and authorization configuration.
+* Follow established validation and error handling.
+* Maintain compatibility with existing API consumers.
+
+Controllers and endpoints should coordinate HTTP requests and responses, not become repositories or business services.
+
+Do not introduce a different API architecture or response format without an explicit requirement and approval.
+
+4. Business logic implementation standards
+
+Business logic MUST follow the same organization and execution patterns already established in CloudMedia.
+
+Before implementing business logic, inspect existing service methods and understand:
+
+* How operations receive their inputs.
+* How input validation is performed.
+* How business rules are evaluated.
+* How dependencies are used.
+* How repository operations are invoked.
+* How physical file operations are coordinated.
+* How unsuccessful operations are represented.
+* How exceptions and errors are handled.
+* How results are returned to the API layer.
+
+Mandatory rules
+
+1. Business logic belongs in the appropriate existing Services implementation.
+2. Persistence operations must respect the Repository responsibility.
+3. Physical file operations must respect the existing storage implementation and its boundaries.
+4. Controllers must not become the primary location for business logic.
+5. Repository implementations must not become responsible for unrelated business workflows.
+6. Do not duplicate existing business rules.
+7. Do not bypass existing services to access internal implementation details from the API.
+8. Do not change established operation behavior unless required by the approved specification.
+9. Preserve existing business invariants and data consistency.
+10. Follow the existing error and result propagation strategy.
+
+When an operation involves multiple responsibilities, coordinate them using the same patterns already established by the project.
+
+Do not introduce a new orchestration pattern without understanding the current implementation.
+
+5. HTTP API development standards
+
+All new HTTP endpoints MUST follow the conventions used by existing CloudMedia endpoints.
+
+Before creating an endpoint, inspect comparable controllers and determine the project’s actual conventions for:
+
+5.1 Routing
+
+* Controller organization.
+* Route attributes and templates.
+* Resource naming.
+* Route parameters.
+* Query parameters.
+* API versioning, if present.
+
+Do not invent a new routing convention.
+
+5.2 HTTP methods and status codes
+
+Follow the existing conventions for:
+
+* GET.
+* POST.
+* PUT.
+* PATCH, if used.
+* DELETE.
+
+Use HTTP status codes that accurately represent the operation and are consistent with the existing API.
+
+Do not return successful status codes for failed operations.
+
+Do not introduce inconsistent status-code handling.
+
+5.3 Request and response contracts
+
+Inspect existing request and response models before defining new ones.
+
+Respect:
+
+* Naming conventions.
+* Serialization conventions.
+* Property types.
+* Nullability.
+* Data annotations or validation mechanisms.
+* Existing pagination structures.
+* Existing response wrappers, if any.
+* Existing error response formats.
+
+Do not expose internal database entities directly if the existing API uses dedicated response models.
+
+Do not create unnecessary DTOs when the project already has an established model for the same purpose.
+
+Do not change existing response contracts without evaluating compatibility.
+
+5.4 Controller responsibilities
+
+Controllers must follow the existing implementation style.
+
+Avoid:
+
+* Business logic inside controller actions.
+* Direct database queries from controllers.
+* Direct access to physical storage when the existing architecture delegates it to another component.
+* Duplicated validation logic.
+* Repeated response construction patterns when shared conventions already exist.
+
+Use the existing service invocation, response handling, and asynchronous patterns.
+
+5.5 API documentation
+
+Follow the existing API documentation conventions.
+
+Inspect how the project currently documents endpoints, request parameters, response types, and possible error responses.
+
+Do not introduce a different documentation approach without justification.
+
+6. Data access and Entity Framework Core
+
+The project uses Entity Framework Core for persistence.
+
+New database-related implementations MUST respect the existing EF Core conventions.
+
+Before changing persistence code, investigate:
+
+* DbContext organization.
+* Entity configurations.
+* Relationships.
+* Keys and indexes.
+* Naming conventions.
+* Query patterns.
+* Tracking and no-tracking behavior.
+* Async operations.
+* Migrations.
+* Existing transaction management.
+
+Mandatory rules:
+
+1. Do not create a second DbContext without an approved architectural reason.
+2. Do not bypass Repository to access the database from Services or API.
+3. Do not duplicate entity configuration.
+4. Do not introduce raw SQL when the existing approach is sufficient.
+5. When raw SQL is necessary, use safe parameterization.
+6. Avoid unnecessary database queries.
+7. Avoid loading complete collections when only a subset is needed.
+8. Respect existing entity relationships and persistence behavior.
+9. Do not modify migrations or database schema beyond the approved requirement.
+10. Do not perform destructive database operations without explicit authorization.
+
+Do not change the persistence strategy as part of an unrelated feature.
+
+7. Security standards within backend development
+
+Security is a mandatory part of every backend implementation.
+
+The Developer Agent MUST preserve and follow the security mechanisms already implemented in CloudMedia.
+
+Before changing an endpoint or business operation, investigate its existing security requirements.
+
+7.1 Authentication and authorization
+
+* Respect the existing authentication mechanism.
+* Respect existing authorization policies and attributes.
+* Verify that protected operations remain protected.
+* Do not assume authentication implies authorization.
+* Do not trust user identifiers or ownership information supplied by the client.
+* Follow the existing mechanism for obtaining the authenticated user’s identity.
+* Verify resource ownership or permissions before accessing protected resources.
+* Do not bypass authorization to simplify an implementation.
+
+7.2 Input validation
+
+* Validate external inputs using the established project mechanisms.
+* Validate identifiers, pagination values, file metadata, and other relevant inputs.
+* Avoid trusting client-supplied data.
+* Prevent invalid data from reaching business operations or persistence.
+* Follow existing validation and error response conventions.
+
+7.3 Sensitive information
+
+* Never hardcode API keys, credentials, tokens, passwords, or connection strings.
+* Never expose secrets in HTTP responses.
+* Never log authentication tokens or sensitive credentials.
+* Do not expose internal exceptions or stack traces to clients.
+* Do not return sensitive entity properties unintentionally.
+* Follow the project’s existing configuration and secret-management mechanisms.
+
+7.4 Database and file operations
+
+* Use parameterized database operations.
+* Prevent unauthorized access to stored media.
+* Respect existing file ownership and access validation.
+* Do not trust file names or paths received from clients.
+* Avoid path traversal vulnerabilities.
+* Follow existing file validation and storage mechanisms.
+
+If a security requirement cannot be satisfied using the existing implementation, stop and report the issue instead of silently weakening an existing control.
+
+These rules complement the dedicated Backend Security instruction. They do not replace it.
+
+8. Dependency injection and component integration
+
+All new services, repositories, and other dependencies MUST follow the existing registration and injection conventions.
+
+Before adding registrations:
+
+* Inspect the current dependency injection configuration.
+* Identify the appropriate registration location.
+* Follow existing service lifetimes.
+* Avoid duplicate registrations.
+* Respect existing abstractions and implementations.
+* Avoid introducing service locator patterns if the project does not use them.
+
+Do not introduce a new dependency injection framework or registration strategy without approval.
+
+9. Error handling and logging
+
+The Developer Agent MUST follow the existing error-handling and logging strategy.
+
+Before implementing error handling, investigate:
+
+* Existing exception types.
+* Existing result models.
+* Existing exception middleware or filters.
+* Existing HTTP error responses.
+* Existing logging conventions.
+* Existing validation error handling.
+
+Mandatory rules:
+
+1. Do not introduce a competing global exception-handling mechanism.
+2. Do not silently swallow exceptions.
+3. Do not expose internal implementation details through API errors.
+4. Do not duplicate error-handling logic unnecessarily.
+5. Use the established logging approach.
+6. Avoid logging credentials, tokens, or sensitive information.
+7. Preserve existing error propagation behavior.
+
+If an appropriate error-handling pattern already exists, reuse it.
+
+10. Asynchronous programming
+
+Follow the asynchronous programming conventions already established in the project.
+
+When an operation involves asynchronous I/O:
+
+* Follow the existing async/await patterns.
+* Use asynchronous EF Core operations where appropriate.
+* Avoid blocking asynchronous operations with .Result or .Wait().
+* Respect existing cancellation-token conventions.
+* Avoid unnecessary asynchronous wrappers around synchronous operations.
+* Preserve the existing method signatures and return conventions where possible.
+
+Do not introduce a different asynchronous programming model without justification.
+
+11. Preserve existing functionality and behavior
+
+The Developer Agent must treat existing CloudMedia behavior as something to preserve, not something to redesign opportunistically.
+
+When implementing a requirement:
+
+* Avoid unrelated changes.
+* Preserve existing API contracts.
+* Preserve existing business rules.
+* Preserve existing data behavior.
+* Preserve existing authentication and authorization.
+* Preserve existing file storage behavior.
+* Avoid breaking existing consumers.
+* Avoid changing naming or folder organization without a clear reason.
+* Avoid replacing working implementations with a different pattern merely because it is preferred.
+
+If an existing implementation must change to support the approved requirement, identify the impact and make only the necessary changes.
+
+Do not perform broad architectural refactoring as part of a feature implementation.
+
+12. Refactoring and architectural changes
+
+Refactoring must be controlled and directly related to the approved requirement.
+
+Before refactoring:
+
+1. Identify the existing implementation.
+2. Explain the problem or limitation.
+3. Determine whether the refactoring is necessary for the requirement.
+4. Identify affected components and potential regressions.
+5. Preserve existing external behavior unless the specification explicitly changes it.
+
+Do not:
+
+* Refactor unrelated modules.
+* Rename unrelated classes or methods.
+* Reorganize the entire project.
+* Introduce new architectural layers.
+* Replace established patterns without justification.
+* Rewrite working code simply to match personal preferences.
+
+If a broader architectural improvement is necessary, document the recommendation and request approval before expanding the implementation scope.
+
+13. Conflict resolution and missing conventions
+
+The Developer Agent may encounter situations where:
+
+* No comparable implementation exists.
+* Existing implementations use conflicting patterns.
+* Project documentation contradicts the source code.
+* A requirement requires a new architectural capability.
+* Existing code appears to contain a security weakness.
+* The correct location or responsibility of a new component is unclear.
+
+In these situations:
+
+1. Investigate the relevant source code and documentation.
+2. Identify the conflicting or missing information.
+3. Explain the available alternatives.
+4. Identify the risks and architectural impact.
+5. Ask the Main Orchestrator for clarification or approval when necessary.
+
+Never invent a convention and present it as an established CloudMedia standard.
+
+Never silently change architectural boundaries.
+
+14. Implementation checklist
+
+Before considering a backend implementation complete, verify:
+
+Architecture
+
+* [ ]	Existing architecture was investigated.
+* [ ]	The correct project and layer were used.
+* [ ]	Existing dependency directions were respected.
+* [ ]	No unnecessary architectural abstractions were introduced.
+
+Business logic
+
+* [ ]	Business logic follows existing service patterns.
+* [ ]	Existing business rules were preserved.
+* [ ]	Database operations remain within Repository.
+* [ ]	File operations respect existing storage responsibilities.
+
+HTTP API
+
+* [ ]	Existing routing conventions were followed.
+* [ ]	HTTP methods and status codes are appropriate.
+* [ ]	Request and response models follow project conventions.
+* [ ]	Controllers do not contain unnecessary business logic.
+* [ ]	Existing API contracts remain compatible.
+
+Security
+
+* [ ]	Authentication and authorization were respected.
+* [ ]	External inputs are validated.
+* [ ]	Resource ownership and permissions are verified where applicable.
+* [ ]	No secrets or sensitive information are exposed.
+* [ ]	Database and file operations follow existing security mechanisms.
+
+Code consistency
+
+* [ ]	Naming and folder organization follow existing conventions.
+* [ ]	Dependency injection follows existing registration patterns.
+* [ ]	Error handling and logging follow existing mechanisms.
+* [ ]	Asynchronous operations follow project conventions.
+* [ ]	Unrelated code was not modified.
+
+Validation
+
+* [ ]	Relevant existing tests were reviewed.
+* [ ]	New behavior was validated using the project’s testing conventions.
+* [ ]	Relevant regression tests were considered.
+* [ ]	Any deviation from existing conventions was justified and documented.
+
+15. Final mandatory rule
+
+When in doubt, follow the closest existing CloudMedia implementation rather than inventing a new one.
+
+The Developer Agent must prioritize consistency with the established project architecture and implementation patterns over personal preferences or generic architectural recommendations.
+
+Every new backend feature should look and behave as though it was developed by someone who already understands how CloudMedia is built.
+
+The goal is not to make every implementation identical. The goal is to maintain one coherent architecture, one consistent development approach, and predictable behavior throughout the project.
